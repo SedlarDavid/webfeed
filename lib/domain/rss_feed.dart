@@ -30,6 +30,7 @@ class RssFeed {
   final String? managingEditor;
   final String? rating;
   final String? webMaster;
+  final String? atomLink;
   final int? ttl;
   final DublinCore? dc;
   final Itunes? itunes;
@@ -54,6 +55,7 @@ class RssFeed {
     this.managingEditor,
     this.rating,
     this.webMaster,
+    this.atomLink,
     this.ttl,
     this.dc,
     this.itunes,
@@ -76,6 +78,13 @@ class RssFeed {
       author: channelElement.findElements('author').firstOrNull?.text,
       description: channelElement.findElements('description').firstOrNull?.text,
       link: channelElement.findElements('link').firstOrNull?.text,
+      atomLink: channelElement
+          .findElements('atom:link')
+          .firstOrNull
+          ?.attributes
+          .where((attribute) => attribute.localName == 'href')
+          .firstOrNull
+          ?.value,
       items: (rdf ?? channelElement)
           .findElements('item')
           .map((e) => RssItem.parse(e))

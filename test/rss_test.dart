@@ -25,6 +25,8 @@ void main() {
     expect(feed.description,
         'Foo bar News and Updates feed provided by Foo bar, Inc.');
     expect(feed.link, 'https://foo.bar.news/');
+    expect(
+        feed.atomLink, 'https://moxie.foxnews.com/google-publisher/world.xml');
     expect(feed.author, 'hello@world.net');
     expect(feed.language, 'en-US');
     expect(feed.lastBuildDate, 'Mon, 26 Mar 2018 14:00:00 PDT');

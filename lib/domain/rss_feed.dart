@@ -8,6 +8,7 @@ import 'package:webfeed/domain/rss_image.dart';
 import 'package:webfeed/domain/rss_item.dart';
 import 'package:webfeed/domain/syndication/syndication.dart';
 import 'package:webfeed/util/iterable.dart';
+import 'package:webfeed/util/xml.dart';
 import 'package:xml/xml.dart';
 
 class RssFeed {
@@ -63,73 +64,158 @@ class RssFeed {
   });
 
   factory RssFeed.parse(String xmlString) {
-    var document = XmlDocument.parse(xmlString);
-    var rss = document.findElements('rss').firstOrNull;
-    var rdf = document.findElements('rdf:RDF').firstOrNull;
-    if (rss == null && rdf == null) {
-      throw ArgumentError('not a rss feed');
+    try {
+      var document = XmlDocument.parse(xmlString);
+      
+      // Find RSS element - check for standard RSS or RDF-based RSS
+      var rss = document.findElements('rss').firstOrNull;
+      var rdf = document.findElements('rdf:RDF').firstOrNull;
+      
+      // Fallback to checking for RDF without namespace if not found with namespace
+      if (rdf == null) {
+        var allRdf = document.findAllElements('RDF');
+        if (allRdf.isNotEmpty) {
+          rdf = allRdf.first;
+        }
+      }
+      
+      if (rss == null && rdf == null) {
+        throw ArgumentError('not a rss feed');
+      }
+      
+      // Find channel element
+      var channelElement = (rss ?? rdf)!.findElements('channel').firstOrNull;
+      if (channelElement == null) {
+        throw ArgumentError('channel not found');
+      }
+      
+      // Find RSS items - they can be under channel in RSS 2.0 or directly under RDF in RSS 1.0
+      var itemContainer = rdf ?? channelElement;
+      
+      // Parse the feed
+      return RssFeed(
+        title: _getTextContent(channelElement, 'title'),
+        author: _getTextContent(channelElement, 'author') ?? 
+                _getTextContent(channelElement, 'creator'),
+        description: _getTextContent(channelElement, 'description'),
+        link: _getTextContent(channelElement, 'link'),
+        
+        // Look for atom:link with type application/rss+xml and rel=self
+        atomLink: _findAtomLink(channelElement),
+        
+        items: itemContainer
+            .findAllElements('item')
+            .map((e) => RssItem.parse(e))
+            .toList(),
+        
+        image: _parseImage(rdf, channelElement),
+        
+        cloud: channelElement
+            .findElements('cloud')
+            .map((e) => RssCloud.parse(e))
+            .firstOrNull,
+            
+        categories: findAllElementsWithNamespace(channelElement, 'category')
+            .map((e) => RssCategory.parse(e))
+            .toList(),
+            
+        skipDays: _parseSkipDays(channelElement),
+        
+        skipHours: _parseSkipHours(channelElement),
+        
+        lastBuildDate: _getTextContent(channelElement, 'lastBuildDate'),
+        language: _getTextContent(channelElement, 'language'),
+        generator: _getTextContent(channelElement, 'generator'),
+        copyright: _getTextContent(channelElement, 'copyright') ?? 
+                   _getTextContent(channelElement, 'rights'),
+        docs: _getTextContent(channelElement, 'docs'),
+        managingEditor: _getTextContent(channelElement, 'managingEditor'),
+        rating: _getTextContent(channelElement, 'rating'),
+        webMaster: _getTextContent(channelElement, 'webMaster'),
+        ttl: int.tryParse(_getTextContent(channelElement, 'ttl') ?? '') ?? 0,
+        
+        // Parse additional namespaces
+        dc: DublinCore.parse(channelElement),
+        itunes: Itunes.parse(channelElement),
+        syndication: Syndication.parse(channelElement),
+      );
+    } catch (e) {
+      // Provide a more helpful error message
+      throw ArgumentError('Failed to parse RSS feed: ${e.toString()}');
     }
-    var channelElement = (rss ?? rdf)!.findElements('channel').firstOrNull;
-    if (channelElement == null) {
-      throw ArgumentError('channel not found');
+  }
+  
+  // Helper to get text content with namespace support
+  static String? _getTextContent(XmlElement element, String tagName) {
+    final foundElement = findElementWithNamespace(element, tagName);
+    return foundElement != null ? foundElement.value?.trim() : null;
+  }
+  
+  // Parse atom:link with improved namespace handling
+  static String? _findAtomLink(XmlElement element) {
+    var atomLinks = findAllElementsWithNamespace(element, 'link')
+        .where((link) => link.name.qualified.contains(':'))
+        .toList();
+    
+    // First check for a link with rel="self"
+    for (var link in atomLinks) {
+      if (getAttributeWithNamespace(link, 'rel') == 'self') {
+        return getAttributeWithNamespace(link, 'href');
+      }
     }
-    return RssFeed(
-      title: channelElement.findElements('title').firstOrNull?.text,
-      author: channelElement.findElements('author').firstOrNull?.text,
-      description: channelElement.findElements('description').firstOrNull?.text,
-      link: channelElement.findElements('link').firstOrNull?.text,
-      atomLink: channelElement
-          .findElements('atom:link')
-          .firstOrNull
-          ?.attributes
-          .where((attribute) => attribute.localName == 'href')
-          .firstOrNull
-          ?.value,
-      items: (rdf ?? channelElement)
-          .findElements('item')
-          .map((e) => RssItem.parse(e))
-          .toList(),
-      image: (rdf ?? channelElement)
-          .findElements('image')
-          .map((e) => RssImage.parse(e))
-          .firstOrNull,
-      cloud: channelElement
-          .findElements('cloud')
-          .map((e) => RssCloud.parse(e))
-          .firstOrNull,
-      categories: channelElement
-          .findElements('category')
-          .map((e) => RssCategory.parse(e))
-          .toList(),
-      skipDays: channelElement
-              .findElements('skipDays')
-              .firstOrNull
-              ?.findAllElements('day')
-              .map((e) => e.text)
-              .toList() ??
-          [],
-      skipHours: channelElement
-              .findElements('skipHours')
-              .firstOrNull
-              ?.findAllElements('hour')
-              .map((e) => int.tryParse(e.text) ?? 0)
-              .toList() ??
-          [],
-      lastBuildDate:
-          channelElement.findElements('lastBuildDate').firstOrNull?.text,
-      language: channelElement.findElements('language').firstOrNull?.text,
-      generator: channelElement.findElements('generator').firstOrNull?.text,
-      copyright: channelElement.findElements('copyright').firstOrNull?.text,
-      docs: channelElement.findElements('docs').firstOrNull?.text,
-      managingEditor:
-          channelElement.findElements('managingEditor').firstOrNull?.text,
-      rating: channelElement.findElements('rating').firstOrNull?.text,
-      webMaster: channelElement.findElements('webMaster').firstOrNull?.text,
-      ttl: int.tryParse(
-          channelElement.findElements('ttl').firstOrNull?.text ?? '0'),
-      dc: DublinCore.parse(channelElement),
-      itunes: Itunes.parse(channelElement),
-      syndication: Syndication.parse(channelElement),
-    );
+    
+    // Fall back to any atom:link if no self link is found
+    return atomLinks.isNotEmpty
+        ? getAttributeWithNamespace(atomLinks.first, 'href')
+        : null;
+  }
+  
+  // Parse skipDays with robust error handling
+  static List<String> _parseSkipDays(XmlElement channelElement) {
+    try {
+      final skipDaysElement = findElementWithNamespace(channelElement, 'skipDays');
+      if (skipDaysElement == null) return [];
+      
+      return findAllElementsWithNamespace(skipDaysElement, 'day')
+          .map((e) => e.value?.trim() ?? '')
+          .where((text) => text.isNotEmpty)
+          .toList();
+    } catch (e) {
+      return [];
+    }
+  }
+  
+  // Parse skipHours with robust error handling
+  static List<int> _parseSkipHours(XmlElement channelElement) {
+    try {
+      final skipHoursElement = findElementWithNamespace(channelElement, 'skipHours');
+      if (skipHoursElement == null) return [];
+      
+      return findAllElementsWithNamespace(skipHoursElement, 'hour')
+          .map((e) => int.tryParse(e.value?.trim() ?? '') ?? -1)
+          .where((hour) => hour >= 0 && hour <= 23)
+          .toList();
+    } catch (e) {
+      return [];
+    }
+  }
+  
+  // Parse image with fallback for different locations
+  static RssImage? _parseImage(XmlElement? rdf, XmlElement channelElement) {
+    // Try RDF location first (RSS 1.0)
+    if (rdf != null) {
+      final rdfImage = findElementWithNamespace(rdf, 'image');
+      if (rdfImage != null) {
+        return RssImage.parse(rdfImage);
+      }
+    }
+    
+    // Try channel location (RSS 2.0)
+    final channelImage = findElementWithNamespace(channelElement, 'image');
+    if (channelImage != null) {
+      return RssImage.parse(channelImage);
+    }
+    
+    return null;
   }
 }

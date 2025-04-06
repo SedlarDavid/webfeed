@@ -1,0 +1,538 @@
+{
+  "total": 66,
+  "successful": 41,
+  "failed": 10,
+  "skipped": 15,
+  "rss": 37,
+  "atom": 4,
+  "details": [
+    {
+      "url": "https://moxie.foxnews.com/google-publisher/latest.xml",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 25,
+      "error": null
+    },
+    {
+      "url": "https://www.irozhlas.cz/rss/irozhlas",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 20,
+      "error": null
+    },
+    {
+      "url": "https://ct24.ceskatelevize.cz/rss/tema/vyber-redakce-84313",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 30,
+      "error": null
+    },
+    {
+      "url": "https://www.theverge.com/rss/index.xml",
+      "status": "success",
+      "type": "Atom",
+      "title": "The Verge",
+      "itemCount": 10,
+      "error": null
+    },
+    {
+      "url": "http://feeds.abcnews.com/abcnews/usheadlines",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 25,
+      "error": null
+    },
+    {
+      "url": "http://rss.cnn.com/rss/cnn_topstories.rss",
+      "status": "skipped",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "HandshakeException: Connection terminated during handshake"
+    },
+    {
+      "url": "http://www.cbsnews.com/latest/rss/main",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 30,
+      "error": null
+    },
+    {
+      "url": "http://www.nytimes.com/services/xml/rss/nyt/National.xml",
+      "status": "skipped",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "Exception: HTTP Error: 404"
+    },
+    {
+      "url": "http://online.wsj.com/xml/rss/3_7085.xml",
+      "status": "skipped",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "Exception: HTTP Error: 401"
+    },
+    {
+      "url": "http://content.usatoday.com/marketing/rss/rsstrans.aspx?feedId=news2",
+      "status": "failed",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "RSS Error: Invalid argument(s): Failed to parse RSS feed: XmlParserException: name expected at 1:2\nAtom Error: XmlParserException: name expected at 1:2"
+    },
+    {
+      "url": "http://rss.csmonitor.com/feeds/usa",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 20,
+      "error": null
+    },
+    {
+      "url": "http://feeds.nbcnews.com/feeds/topstories",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 25,
+      "error": null
+    },
+    {
+      "url": "http://feeds.nbcnews.com/feeds/worldnews",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 25,
+      "error": null
+    },
+    {
+      "url": "http://feeds.reuters.com/Reuters/worldNews",
+      "status": "skipped",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "ClientException with SocketException: Failed host lookup: 'feeds.reuters.com' (OS Error: nodename nor servname provided, or not known, errno = 8), uri=https://feeds.reuters.com/Reuters/worldNews"
+    },
+    {
+      "url": "http://feeds.reuters.com/Reuters/domesticNews",
+      "status": "skipped",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "ClientException with SocketException: Failed host lookup: 'feeds.reuters.com' (OS Error: nodename nor servname provided, or not known, errno = 8), uri=https://feeds.reuters.com/Reuters/domesticNews"
+    },
+    {
+      "url": "http://hosted.ap.org/lineups/USHEADS.rss",
+      "status": "failed",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "RSS Error: Invalid argument(s): Failed to parse RSS feed: XmlParserException: Expected a single root element at 1:62\nAtom Error: XmlParserException: Expected a single root element at 1:62"
+    },
+    {
+      "url": "http://hosted.ap.org/lineups/WORLDHEADS.rss",
+      "status": "failed",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "RSS Error: Invalid argument(s): Failed to parse RSS feed: XmlParserException: Expected a single root element at 1:62\nAtom Error: XmlParserException: Expected a single root element at 1:62"
+    },
+    {
+      "url": "http://www.huffingtonpost.com/feeds/verticals/world/index.xml",
+      "status": "failed",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "RSS Error: Invalid argument(s): Failed to parse RSS feed: XmlParserException: name expected at 1:2\nAtom Error: XmlParserException: name expected at 1:2"
+    },
+    {
+      "url": "http://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 39,
+      "error": null
+    },
+    {
+      "url": "http://news.yahoo.com/rss/us",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 5,
+      "error": null
+    },
+    {
+      "url": "http://rss.news.yahoo.com/rss/world",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 5,
+      "error": null
+    },
+    {
+      "url": "http://www.newsweek.com/rss",
+      "status": "skipped",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "Error on line 1, column 17: Invalid media type: expected /[^()<>@,;:\"\\\\/[\\]?={} \\t\\x00-\\x1F\\x7F]+/.\n  ╷\n1 │ application/xml;\n  │                 ^\n  ╵"
+    },
+    {
+      "url": "http://feeds.feedburner.com/thedailybeast/articles",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 25,
+      "error": null
+    },
+    {
+      "url": "http://qz.com/feed",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 50,
+      "error": null
+    },
+    {
+      "url": "http://www.theguardian.com/world/usa/rss",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 35,
+      "error": null
+    },
+    {
+      "url": "http://www.politico.com/rss/politicopicks.xml",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 38,
+      "error": null
+    },
+    {
+      "url": "http://www.newyorker.com/feed/news",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 25,
+      "error": null
+    },
+    {
+      "url": "http://feeds.feedburner.com/NationPBSNewsHour",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 15,
+      "error": null
+    },
+    {
+      "url": "http://feeds.feedburner.com/NewshourWorld",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 15,
+      "error": null
+    },
+    {
+      "url": "http://www.usnews.com/rss/news",
+      "status": "skipped",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "TimeoutException after 0:00:15.000000: Future not completed"
+    },
+    {
+      "url": "http://www.npr.org/rss/rss.php?id=1003",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 10,
+      "error": null
+    },
+    {
+      "url": "http://www.npr.org/rss/rss.php?id=1004",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 10,
+      "error": null
+    },
+    {
+      "url": "http://feeds.feedburner.com/AtlanticNational",
+      "status": "success",
+      "type": "Atom",
+      "title": "U.S. | The Atlantic",
+      "itemCount": 25,
+      "error": null
+    },
+    {
+      "url": "http://feeds.feedburner.com/TheAtlanticWire",
+      "status": "success",
+      "type": "Atom",
+      "title": "The Atlantic",
+      "itemCount": 20,
+      "error": null
+    },
+    {
+      "url": "http://www.latimes.com/nation/rss2.0.xml",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 100,
+      "error": null
+    },
+    {
+      "url": "http://www.latimes.com/world/rss2.0.xml",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 100,
+      "error": null
+    },
+    {
+      "url": "http://api.breakingnews.com/api/v1/item/?format=rss",
+      "status": "skipped",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "TimeoutException after 0:00:15.000000: Future not completed"
+    },
+    {
+      "url": "https://news.vice.com/rss",
+      "status": "skipped",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "ClientException with SocketException: Failed host lookup: 'news.vice.com' (OS Error: nodename nor servname provided, or not known, errno = 8), uri=https://news.vice.com/rss"
+    },
+    {
+      "url": "http://talkingpointsmemo.com/feed/livewire",
+      "status": "skipped",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "Exception: HTTP Error: 404"
+    },
+    {
+      "url": "http://www.salon.com/category/news/feed/rss/",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 0,
+      "error": null
+    },
+    {
+      "url": "http://time.com/newsfeed/feed/",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 10,
+      "error": null
+    },
+    {
+      "url": "http://feeds.foxnews.com/foxnews/latest?format=xml",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 25,
+      "error": null
+    },
+    {
+      "url": "http://mashable.com/us-world/rss/",
+      "status": "skipped",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "Exception: HTTP Error: 404"
+    },
+    {
+      "url": "http://www.politico.com/rss/magazine.xml",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 30,
+      "error": null
+    },
+    {
+      "url": "http://www.politico.com/rss/Top10Blogs.xml",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 10,
+      "error": null
+    },
+    {
+      "url": "http://www.huffingtonpost.com/feeds/verticals/politics/index.xml",
+      "status": "failed",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "RSS Error: Invalid argument(s): Failed to parse RSS feed: XmlParserException: name expected at 1:2\nAtom Error: XmlParserException: name expected at 1:2"
+    },
+    {
+      "url": "http://rss.cnn.com/rss/cnn_allpolitics.rss",
+      "status": "skipped",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "HandshakeException: Connection terminated during handshake"
+    },
+    {
+      "url": "http://www.buzzfeed.com/politics.xml",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 50,
+      "error": null
+    },
+    {
+      "url": "http://feeds.nbcnews.com/feeds/nbcpolitics",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 25,
+      "error": null
+    },
+    {
+      "url": "http://feeds.foxnews.com/foxnews/politics",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 25,
+      "error": null
+    },
+    {
+      "url": "http://feeds.washingtonpost.com/rss/rss_election-2012",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 81,
+      "error": null
+    },
+    {
+      "url": "http://rss.nytimes.com/services/xml/rss/nyt/Politics.xml",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 21,
+      "error": null
+    },
+    {
+      "url": "http://rss.nytimes.com/services/xml/rss/nyt/Upshot.xml",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 20,
+      "error": null
+    },
+    {
+      "url": "http://thecaucus.blogs.nytimes.com/feed/",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 21,
+      "error": null
+    },
+    {
+      "url": "http://feeds.reuters.com/Reuters/PoliticsNews",
+      "status": "skipped",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "ClientException with SocketException: Failed host lookup: 'feeds.reuters.com' (OS Error: nodename nor servname provided, or not known, errno = 8), uri=https://feeds.reuters.com/Reuters/PoliticsNews"
+    },
+    {
+      "url": "http://blogs.wsj.com/washwire/feed/?mod=WSJ_Politics%2520and%2520Policy",
+      "status": "skipped",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "Exception: HTTP Error: 403"
+    },
+    {
+      "url": "http://www.reddit.com/r/politics/.rss",
+      "status": "success",
+      "type": "Atom",
+      "title": "Politics",
+      "itemCount": 26,
+      "error": null
+    },
+    {
+      "url": "http://feeds.dailykos.com/dailykos/index.xml",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 50,
+      "error": null
+    },
+    {
+      "url": "http://www.npr.org/rss/rss.php?id=1014",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 10,
+      "error": null
+    },
+    {
+      "url": "http://www.npr.org/rss/rss.php?id=5",
+      "status": "success",
+      "type": "RSS",
+      "title": null,
+      "itemCount": 10,
+      "error": null
+    },
+    {
+      "url": "http://www.rollcall.com/rss/all_news.xml",
+      "status": "skipped",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "Exception: HTTP Error: 404"
+    },
+    {
+      "url": "http://www.rollcall.com/news/?zkDo=showRSS",
+      "status": "failed",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "RSS Error: Invalid argument(s): Failed to parse RSS feed: XmlParserException: name expected at 1:2\nAtom Error: XmlParserException: name expected at 1:2"
+    },
+    {
+      "url": "http://www.rollcall.com/politics/archives/?zkDo=showRSS",
+      "status": "failed",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "RSS Error: Invalid argument(s): Failed to parse RSS feed: XmlParserException: name expected at 1:2\nAtom Error: XmlParserException: name expected at 1:2"
+    },
+    {
+      "url": "http://www.rollcall.com/policy/archives/?zkDo=showRSS",
+      "status": "failed",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "RSS Error: Invalid argument(s): Failed to parse RSS feed: XmlParserException: name expected at 1:2\nAtom Error: XmlParserException: name expected at 1:2"
+    },
+    {
+      "url": "http://www.nationaljournal.com/?rss=1",
+      "status": "failed",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "RSS Error: Invalid argument(s): Failed to parse RSS feed: XmlParserException: \">\" expected at 5:4529\nAtom Error: XmlParserException: \">\" expected at 5:4529"
+    },
+    {
+      "url": "http://www.nationaljournal.com/white-house?rss=1",
+      "status": "failed",
+      "type": "unknown",
+      "title": null,
+      "itemCount": 0,
+      "error": "RSS Error: Invalid argument(s): Failed to parse RSS feed: XmlParserException: name expected at 2:2\nAtom Error: XmlParserException: name expected at 2:2"
+    }
+  ]
+}

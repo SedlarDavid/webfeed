@@ -53,10 +53,6 @@ FeedType detectFeedType(String xml) {
 
     // Check for RSS 2.0
     if (rootElement.name.local == 'rss') {
-      // Check for Atom namespace
-      if (rootElement.getAttribute('xmlns:atom') != null) {
-        return FeedType.atom;
-      }
       return FeedType.rss;
     }
 

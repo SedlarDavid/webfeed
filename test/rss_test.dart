@@ -91,6 +91,40 @@ void main() {
     expect(
         feed.items!.first.content!.images.first, 'https://test.com/image_link');
   });
+  test('parse RSS-Simple.xml', () {
+    var xmlString = File('test/xml/RSS-Simple.xml').readAsStringSync();
+
+    var feed = RssFeed.parse(xmlString);
+
+    expect(feed.title, 'ČT24 — Výběr redakce');
+    expect(feed.description, 'Zprávy ČT24 na téma Výběr redakce');
+    expect(feed.link, 'https://ct24.ceskatelevize.cz');
+    expect(feed.language, 'cs');
+
+    expect(feed.image!.title, 'ČT24 — Výběr redakce');
+    expect(
+        feed.image!.url, 'https://ct24.ceskatelevize.cz/google-touch-icon.png');
+    expect(feed.image!.link, 'https://ct24.ceskatelevize.cz');
+
+    expect(feed.items!.length, 20);
+
+    var firstItem = feed.items!.first;
+    expect(firstItem.title,
+        'Úspěch země závisí na tom, jak se změní EU, řekl Fiala na konferenci Česko na křižovatce');
+    expect(firstItem.description,
+        'Úspěch Česka závisí na tom, jak se změní celá Evropa, sdělil na konferenci Česko na křižovatce premiér Petr Fiala (ODS). Za hlavní problém pro konkurenceschopnost EU vnímá zejména nadměrnou regulaci. Podle ekonoma Václava Vislouse (Piráti) vzniká nadměrná byrokracie spíše implementací unijních pravidel na národní úrovni. Tuzemský byznys podle šéfa Svazu průmyslu a dopravy Jana Rafaje potřebuje vidět skutečné změny jako třeba dokončení jednotného evropského trhu.');
+    expect(firstItem.link,
+        'https://ct24.ceskatelevize.cz/clanek/domaci/uspech-zeme-zavisi-na-tom-jak-se-zmeni-eu-rekl-fiala-na-konferenci-cesko-na-krizovatce-360078');
+    expect(firstItem.guid,
+        'https://ct24.ceskatelevize.cz/clanek/domaci/uspech-zeme-zavisi-na-tom-jak-se-zmeni-eu-rekl-fiala-na-konferenci-cesko-na-krizovatce-360078');
+    expect(firstItem.pubDate, DateTime.parse('Tue, 15 Apr 2025 11:26:56 GMT'));
+    expect(firstItem.categories!.first.domain,
+        'https://ct24.ceskatelevize.cz/rubrika/domaci-5');
+    expect(firstItem.categories!.first.value, 'Domácí');
+    expect(firstItem.enclosure!.url,
+        'https://fs2-ct24.ceskatelevize.cz/image/ODMyY2U3ZmEzNDJmNGNhZN8iMydWqm1GehOcXnRjC1uk22p-TO5ZrXmls9GFdZOedZYd65Wa2BdohuKWkClA1vkfTQuAmGARDVfB4Tfh2pbz0_Qr7SuHelhqGX-ub7221cLmXBA4_scBxRN9k3-datxI8jG4XbKsz5I099FHq01Suv36f-j1poHuoGoSK7KyiqC4ubFi3hcSo1xp-avXWQ.jpg?width=228');
+    expect(firstItem.enclosure!.type, 'image/webp');
+  });
   test('parse RSS-Media.xml', () {
     var xmlString = File('test/xml/RSS-Media.xml').readAsStringSync();
 
@@ -379,9 +413,16 @@ void main() {
 
     var feed = RssFeed.parse(xmlString);
 
-    expect(feed.itunes != null && feed.itunes!.owner != null && feed.itunes!.owner!.name == 'Changelog Media', true);
+    expect(
+        feed.itunes != null &&
+            feed.itunes!.owner != null &&
+            feed.itunes!.owner!.name == 'Changelog Media',
+        true);
     var item = feed.items![0];
-    expect(item.itunes != null && item.itunes!.episodeType == ItunesEpisodeType.full, true);
+    expect(
+        item.itunes != null &&
+            item.itunes!.episodeType == ItunesEpisodeType.full,
+        true);
     expect(item.itunes != null && item.itunes!.duration == null, true);
     expect(item.itunes != null && item.itunes!.title == 'awesome title', true);
   });

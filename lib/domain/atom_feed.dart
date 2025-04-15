@@ -47,10 +47,19 @@ class AtomFeed {
     }
 
     return AtomFeed(
-      id: feedElement.findElements('id').firstOrNull?.text,
-      title: feedElement.findElements('title').firstOrNull?.text,
-      updated:
-          parseDateTime(feedElement.findElements('updated').firstOrNull?.text),
+      id: feedElement.findElements('id').firstOrNull?.value?.trim() ??
+          feedElement.findElements('id').firstOrNull?.text.trim() ??
+          feedElement.findElements('id').firstOrNull?.innerText.trim(),
+      title: feedElement.findElements('title').firstOrNull?.value?.trim() ??
+          feedElement.findElements('title').firstOrNull?.text.trim() ??
+          feedElement.findElements('title').firstOrNull?.innerText.trim(),
+      updated: parseDateTime(feedElement
+              .findElements('updated')
+              .firstOrNull
+              ?.value
+              ?.trim() ??
+          feedElement.findElements('updated').firstOrNull?.text.trim() ??
+          feedElement.findElements('updated').firstOrNull?.innerText.trim()),
       items: feedElement
           .findElements('entry')
           .map((e) => AtomItem.parse(e))
@@ -75,10 +84,22 @@ class AtomFeed {
           .findElements('generator')
           .map((e) => AtomGenerator.parse(e))
           .firstOrNull,
-      icon: feedElement.findElements('icon').firstOrNull?.text,
-      logo: feedElement.findElements('logo').firstOrNull?.text,
-      rights: feedElement.findElements('rights').firstOrNull?.text,
-      subtitle: feedElement.findElements('subtitle').firstOrNull?.text,
+      icon: feedElement.findElements('icon').firstOrNull?.value?.trim() ??
+          feedElement.findElements('icon').firstOrNull?.text.trim() ??
+          feedElement.findElements('icon').firstOrNull?.innerText.trim(),
+      logo: feedElement.findElements('logo').firstOrNull?.value?.trim() ??
+          feedElement.findElements('logo').firstOrNull?.text.trim() ??
+          feedElement.findElements('logo').firstOrNull?.innerText.trim(),
+      rights: feedElement.findElements('rights').firstOrNull?.value?.trim() ??
+          feedElement.findElements('rights').firstOrNull?.text.trim() ??
+          feedElement.findElements('rights').firstOrNull?.innerText.trim(),
+      subtitle: feedElement
+              .findElements('subtitle')
+              .firstOrNull
+              ?.value
+              ?.trim() ??
+          feedElement.findElements('subtitle').firstOrNull?.text.trim() ??
+          feedElement.findElements('subtitle').firstOrNull?.innerText.trim(),
     );
   }
 }

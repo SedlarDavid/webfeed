@@ -49,32 +49,32 @@ class RssItem {
         title: _getTextContent(element, 'title'),
         description: _getTextContent(element, 'description'),
         link: _getTextContent(element, 'link'),
-        
+
         categories: findAllElementsWithNamespace(element, 'category')
             .map((e) => RssCategory.parse(e))
             .toList(),
-            
+
         guid: _getTextContent(element, 'guid'),
-        
+
         // Try multiple date fields with different names
         pubDate: _parsePublishedDate(element),
-        
+
         // Try multiple author fields with different names
-        author: _getTextContent(element, 'author') ?? 
-                _getTextContent(element, 'creator') ??
-                _getTextContent(element, 'dc:creator'),
-                
+        author: _getTextContent(element, 'author') ??
+            _getTextContent(element, 'creator') ??
+            _getTextContent(element, 'dc:creator'),
+
         comments: _getTextContent(element, 'comments'),
-        
+
         source: _parseSource(element),
-        
+
         // Parse content with fallbacks for different formats
         content: _parseContent(element),
-        
+
         media: Media.parse(element),
-        
+
         enclosure: _parseEnclosure(element),
-        
+
         dc: DublinCore.parse(element),
         itunes: Itunes.parse(element),
       );
@@ -86,18 +86,22 @@ class RssItem {
       );
     }
   }
-  
+
   // Helper method to get text content with namespace support
   static String? _getTextContent(XmlElement element, String tagName) {
     final foundElement = findElementWithNamespace(element, tagName);
-    return foundElement != null ? foundElement.value?.trim() : null;
+    return foundElement != null
+        ? (foundElement.value?.trim() ??
+            foundElement.text.trim() ??
+            foundElement.innerText.trim())
+        : null;
   }
-  
+
   // Parse published date with fallbacks for different date field names
   static DateTime? _parsePublishedDate(XmlElement element) {
     // Try different field names in order of preference
     final dateFields = ['pubDate', 'published', 'pubdate', 'dc:date', 'date'];
-    
+
     for (var field in dateFields) {
       final dateText = _getTextContent(element, field);
       if (dateText != null && dateText.isNotEmpty) {
@@ -105,10 +109,10 @@ class RssItem {
         if (parsedDate != null) return parsedDate;
       }
     }
-    
+
     return null;
   }
-  
+
   // Parse source with better error handling
   static RssSource? _parseSource(XmlElement element) {
     try {
@@ -118,30 +122,40 @@ class RssItem {
       return null;
     }
   }
-  
+
   // Parse content with support for different content formats
   static RssContent? _parseContent(XmlElement element) {
     // Try content:encoded first (standard RSS 2.0 content module)
     var contentElement = findElementWithNamespace(element, 'content:encoded');
-    
+
     // Try content namespace as fallback
     if (contentElement == null) {
       contentElement = findElementWithNamespace(element, 'encoded');
     }
-    
+
     // Try content tag as fallback
     if (contentElement == null) {
       contentElement = findElementWithNamespace(element, 'content');
     }
-    
+
+    // Fallback to extracting text directly from the element
+    if (contentElement == null) {
+      final rawContent = element.getElement('content')?.innerText;
+      if (rawContent != null && rawContent.isNotEmpty) {
+        return RssContent(rawContent, [], [], [], rawContent);
+      }
+    }
+
     return contentElement != null ? RssContent.parse(contentElement) : null;
   }
-  
+
   // Parse enclosure with better error handling
   static RssEnclosure? _parseEnclosure(XmlElement element) {
     try {
       final enclosureElement = findElementWithNamespace(element, 'enclosure');
-      return enclosureElement != null ? RssEnclosure.parse(enclosureElement) : null;
+      return enclosureElement != null
+          ? RssEnclosure.parse(enclosureElement)
+          : null;
     } catch (e) {
       return null;
     }

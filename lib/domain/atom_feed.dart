@@ -3,6 +3,7 @@ import 'package:webfeed/domain/atom_generator.dart';
 import 'package:webfeed/domain/atom_item.dart';
 import 'package:webfeed/domain/atom_link.dart';
 import 'package:webfeed/domain/atom_person.dart';
+import 'package:webfeed/domain/rss_item.dart';
 import 'package:webfeed/util/datetime.dart';
 import 'package:webfeed/util/iterable.dart';
 import 'package:xml/xml.dart';
@@ -38,6 +39,34 @@ class AtomFeed {
     this.rights,
     this.subtitle,
   });
+  
+  /// Gets the best available image for the feed.
+  /// 
+  /// This attempts to find the most suitable feed image from these sources:
+  /// - Atom logo
+  /// - Atom icon
+  /// 
+  /// Returns null if no feed-level image is found.
+  FeedImage? get feedImage {
+    // Try Atom logo first
+    if (logo != null && logo!.isNotEmpty) {
+      return FeedImage(
+        url: logo!,
+        source: 'atom:logo',
+      );
+    }
+    
+    // Try Atom icon
+    if (icon != null && icon!.isNotEmpty) {
+      return FeedImage(
+        url: icon!,
+        source: 'atom:icon',
+      );
+    }
+    
+    // No feed-level image found
+    return null;
+  }
 
   factory AtomFeed.parse(String xmlString) {
     var document = XmlDocument.parse(xmlString);

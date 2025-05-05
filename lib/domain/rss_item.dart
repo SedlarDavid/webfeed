@@ -9,6 +9,39 @@ import 'package:webfeed/util/datetime.dart';
 import 'package:webfeed/util/xml.dart';
 import 'package:xml/xml.dart';
 
+/// Represents an image from a feed or feed item
+class FeedImage {
+  /// URL of the image
+  final String url;
+  
+  /// Optional width of the image (may be null if not available)
+  final int? width;
+  
+  /// Optional height of the image (may be null if not available)
+  final int? height;
+  
+  /// Optional image type/MIME type (may be null if not available)
+  final String? type;
+
+  /// Optional title of the image (may be null if not available)
+  final String? title;
+
+  /// Source where this image was found in the feed
+  final String source;
+
+  FeedImage({
+    required this.url,
+    this.width,
+    this.height,
+    this.type,
+    this.title,
+    required this.source,
+  });
+}
+
+/// Represents a best image from a feed item (alias of FeedImage for backward compatibility)
+typedef RssItemImage = FeedImage;
+
 class RssItem {
   final String? title;
   final String? description;
@@ -42,6 +75,140 @@ class RssItem {
     this.dc,
     this.itunes,
   });
+
+  /// Gets the best available image from the RSS item
+  /// 
+  /// This attempts to find the most suitable image from various possible sources:
+  /// - media:content with medium="image" and largest available resolution
+  /// - media:thumbnail with largest available resolution
+  /// - itunes:image
+  /// - enclosure with image type
+  /// - image URL extracted from content
+  /// 
+  /// Returns null if no image is found.
+  FeedImage? get image {
+    // Try media:content items first (prefer those in media:group if available)
+    if (media != null) {
+      // First look for images in media:group
+      if (media!.group != null && media!.group!.contents != null) {
+        final mediaContents = media!.group!.contents!
+            .where((content) => 
+                content.medium == 'image' && 
+                content.url != null &&
+                content.url!.isNotEmpty)
+            .toList();
+            
+        if (mediaContents.isNotEmpty) {
+          // Sort by size (larger is better)
+          mediaContents.sort((a, b) {
+            final aSize = (a.width ?? 0) * (a.height ?? 0);
+            final bSize = (b.width ?? 0) * (b.height ?? 0);
+            return bSize.compareTo(aSize);
+          });
+          
+          final bestContent = mediaContents.first;
+          return FeedImage(
+            url: bestContent.url!,
+            width: bestContent.width,
+            height: bestContent.height,
+            type: bestContent.type,
+            source: 'media:group/media:content',
+          );
+        }
+      }
+      
+      // Then check standalone media:content
+      if (media!.contents != null && media!.contents!.isNotEmpty) {
+        final mediaContents = media!.contents!
+            .where((content) => 
+                content.medium == 'image' && 
+                content.url != null &&
+                content.url!.isNotEmpty)
+            .toList();
+            
+        if (mediaContents.isNotEmpty) {
+          // Sort by size (larger is better)
+          mediaContents.sort((a, b) {
+            final aSize = (a.width ?? 0) * (a.height ?? 0);
+            final bSize = (b.width ?? 0) * (b.height ?? 0);
+            return bSize.compareTo(aSize);
+          });
+          
+          final bestContent = mediaContents.first;
+          return FeedImage(
+            url: bestContent.url!,
+            width: bestContent.width,
+            height: bestContent.height,
+            type: bestContent.type,
+            source: 'media:content',
+          );
+        }
+      }
+      
+      // Check media:thumbnail
+      if (media!.thumbnails != null && media!.thumbnails!.isNotEmpty) {
+        final thumbnails = media!.thumbnails!
+            .where((thumb) => thumb.url != null && thumb.url!.isNotEmpty)
+            .toList();
+            
+        if (thumbnails.isNotEmpty) {
+          // Sort by size (larger is better), but we need to parse string dimensions
+          thumbnails.sort((a, b) {
+            final aWidth = int.tryParse(a.width ?? '0') ?? 0;
+            final aHeight = int.tryParse(a.height ?? '0') ?? 0;
+            final bWidth = int.tryParse(b.width ?? '0') ?? 0;
+            final bHeight = int.tryParse(b.height ?? '0') ?? 0;
+            
+            final aSize = aWidth * aHeight;
+            final bSize = bWidth * bHeight;
+            return bSize.compareTo(aSize);
+          });
+          
+          final bestThumbnail = thumbnails.first;
+          return FeedImage(
+            url: bestThumbnail.url!,
+            width: int.tryParse(bestThumbnail.width ?? ''),
+            height: int.tryParse(bestThumbnail.height ?? ''),
+            source: 'media:thumbnail',
+          );
+        }
+      }
+    }
+    
+    // Try iTunes image
+    if (itunes != null && itunes!.image != null && itunes!.image!.href != null) {
+      return FeedImage(
+        url: itunes!.image!.href!,
+        source: 'itunes:image',
+      );
+    }
+    
+    // Try enclosure (if it's an image type)
+    if (enclosure != null && enclosure!.url != null) {
+      final isImage = enclosure!.type != null && 
+                     (enclosure!.type!.startsWith('image/') || 
+                      enclosure!.type == 'image');
+      
+      if (isImage) {
+        return FeedImage(
+          url: enclosure!.url!,
+          type: enclosure!.type,
+          source: 'enclosure',
+        );
+      }
+    }
+    
+    // Try to extract from content
+    if (content != null && content!.images.isNotEmpty) {
+      return FeedImage(
+        url: content!.images.first,
+        source: 'content:encoded',
+      );
+    }
+    
+    // No image found
+    return null;
+  }
 
   factory RssItem.parse(XmlElement element) {
     try {

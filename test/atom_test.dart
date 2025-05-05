@@ -257,4 +257,32 @@ void main() {
     expect(item.content, null);
     expect(item.rights, null);
   });
+  
+  test('Feed image getter for Atom feeds', () {
+    // Test Atom feed with logo
+    var xmlString = File('test/xml/Atom.xml').readAsStringSync();
+    var feed = AtomFeed.parse(xmlString);
+    
+    expect(feed.feedImage, isNotNull);
+    expect(feed.feedImage!.url, 'http://foo.bar.news/logo.png');
+    expect(feed.feedImage!.source, 'atom:logo');
+    
+    // Test feed with no logo but with icon
+    // Create a modified feed to test this condition
+    xmlString = xmlString.replaceAll(
+      '<logo>http://foo.bar.news/logo.png</logo>', 
+      '<!-- removed logo for test -->'
+    );
+    feed = AtomFeed.parse(xmlString);
+    
+    expect(feed.feedImage, isNotNull);
+    expect(feed.feedImage!.url, 'http://foo.bar.news/icon.png');
+    expect(feed.feedImage!.source, 'atom:icon');
+    
+    // Test feed with no feed-level images
+    xmlString = File('test/xml/Atom-Empty.xml').readAsStringSync();
+    feed = AtomFeed.parse(xmlString);
+    
+    expect(feed.feedImage, isNull);
+  });
 }

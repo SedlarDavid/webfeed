@@ -62,6 +62,35 @@ class RssFeed {
     this.itunes,
     this.syndication,
   });
+  
+  /// Gets the best available image for the feed.
+  /// 
+  /// This attempts to find the most suitable feed image from various possible sources:
+  /// - RSS image
+  /// - iTunes image
+  /// 
+  /// Returns null if no feed-level image is found.
+  FeedImage? get feedImage {
+    // Try RSS feed image first
+    if (image != null && image!.url != null && image!.url!.isNotEmpty) {
+      return FeedImage(
+        url: image!.url!,
+        title: image!.title,
+        source: 'rss:image',
+      );
+    }
+    
+    // Try iTunes image
+    if (itunes != null && itunes!.image != null && itunes!.image!.href != null) {
+      return FeedImage(
+        url: itunes!.image!.href!,
+        source: 'itunes:image',
+      );
+    }
+    
+    // No feed-level image found
+    return null;
+  }
 
   factory RssFeed.parse(String xmlString) {
     try {

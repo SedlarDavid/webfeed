@@ -67,6 +67,10 @@ class AtomFeed {
     // No feed-level image found
     return null;
   }
+  
+  /// Gets the best available image for the feed.
+  /// Alias for feedImage to match RSS feed interface.
+  FeedImage? get image => feedImage;
 
   factory AtomFeed.parse(String xmlString) {
     var document = XmlDocument.parse(xmlString);

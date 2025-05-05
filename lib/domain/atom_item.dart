@@ -3,6 +3,7 @@ import 'package:webfeed/domain/atom_link.dart';
 import 'package:webfeed/domain/atom_person.dart';
 import 'package:webfeed/domain/atom_source.dart';
 import 'package:webfeed/domain/media/media.dart';
+import 'package:webfeed/domain/rss_item.dart';
 import 'package:webfeed/util/datetime.dart';
 import 'package:webfeed/util/iterable.dart';
 import 'package:xml/xml.dart';
@@ -38,6 +39,133 @@ class AtomItem {
     this.rights,
     this.media,
   });
+  
+  /// Gets the best available image from the Atom item
+  /// 
+  /// This attempts to find the most suitable image from various possible sources:
+  /// - media:content with medium="image" and largest available resolution
+  /// - media:thumbnail with largest available resolution
+  /// - links with rel="enclosure" and image type
+  /// - image from the source if available
+  /// 
+  /// Returns null if no image is found.
+  FeedImage? get image {
+    // Try media:content items first (prefer those in media:group if available)
+    if (media != null) {
+      // First look for images in media:group
+      if (media!.group != null && media!.group!.contents != null) {
+        final mediaContents = media!.group!.contents!
+            .where((content) => 
+                content.medium == 'image' && 
+                content.url != null &&
+                content.url!.isNotEmpty)
+            .toList();
+            
+        if (mediaContents.isNotEmpty) {
+          // Sort by size (larger is better)
+          mediaContents.sort((a, b) {
+            final aSize = (a.width ?? 0) * (a.height ?? 0);
+            final bSize = (b.width ?? 0) * (b.height ?? 0);
+            return bSize.compareTo(aSize);
+          });
+          
+          final bestContent = mediaContents.first;
+          return FeedImage(
+            url: bestContent.url!,
+            width: bestContent.width,
+            height: bestContent.height,
+            type: bestContent.type,
+            source: 'media:group/media:content',
+          );
+        }
+      }
+      
+      // Then check standalone media:content
+      if (media!.contents != null && media!.contents!.isNotEmpty) {
+        final mediaContents = media!.contents!
+            .where((content) => 
+                content.medium == 'image' && 
+                content.url != null &&
+                content.url!.isNotEmpty)
+            .toList();
+            
+        if (mediaContents.isNotEmpty) {
+          // Sort by size (larger is better)
+          mediaContents.sort((a, b) {
+            final aSize = (a.width ?? 0) * (a.height ?? 0);
+            final bSize = (b.width ?? 0) * (b.height ?? 0);
+            return bSize.compareTo(aSize);
+          });
+          
+          final bestContent = mediaContents.first;
+          return FeedImage(
+            url: bestContent.url!,
+            width: bestContent.width,
+            height: bestContent.height,
+            type: bestContent.type,
+            source: 'media:content',
+          );
+        }
+      }
+      
+      // Check media:thumbnail
+      if (media!.thumbnails != null && media!.thumbnails!.isNotEmpty) {
+        final thumbnails = media!.thumbnails!
+            .where((thumb) => thumb.url != null && thumb.url!.isNotEmpty)
+            .toList();
+            
+        if (thumbnails.isNotEmpty) {
+          // Sort by size (larger is better), but we need to parse string dimensions
+          thumbnails.sort((a, b) {
+            final aWidth = int.tryParse(a.width ?? '0') ?? 0;
+            final aHeight = int.tryParse(a.height ?? '0') ?? 0;
+            final bWidth = int.tryParse(b.width ?? '0') ?? 0;
+            final bHeight = int.tryParse(b.height ?? '0') ?? 0;
+            
+            final aSize = aWidth * aHeight;
+            final bSize = bWidth * bHeight;
+            return bSize.compareTo(aSize);
+          });
+          
+          final bestThumbnail = thumbnails.first;
+          return FeedImage(
+            url: bestThumbnail.url!,
+            width: int.tryParse(bestThumbnail.width ?? ''),
+            height: int.tryParse(bestThumbnail.height ?? ''),
+            source: 'media:thumbnail',
+          );
+        }
+      }
+    }
+    
+    // Try enclosure links (links with rel="enclosure" and image type)
+    if (links != null && links!.isNotEmpty) {
+      final enclosureLinks = links!
+          .where((link) => 
+              link.rel == 'enclosure' && 
+              link.href != null && 
+              link.href!.isNotEmpty &&
+              link.type != null &&
+              (link.type!.startsWith('image/') || link.type == 'image'))
+          .toList();
+          
+      if (enclosureLinks.isNotEmpty) {
+        return FeedImage(
+          url: enclosureLinks.first.href!,
+          type: enclosureLinks.first.type,
+          source: 'atom:link[rel=enclosure]',
+        );
+      }
+    }
+    
+    // Try image from source if available
+    if (source != null && source!.image != null) {
+      return source!.image;
+    }
+    
+    // No image found
+    return null;
+  }
 
   factory AtomItem.parse(XmlElement element) {
     return AtomItem(

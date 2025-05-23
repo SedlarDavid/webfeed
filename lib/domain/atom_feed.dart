@@ -39,13 +39,13 @@ class AtomFeed {
     this.rights,
     this.subtitle,
   });
-  
+
   /// Gets the best available image for the feed.
-  /// 
+  ///
   /// This attempts to find the most suitable feed image from these sources:
   /// - Atom logo
   /// - Atom icon
-  /// 
+  ///
   /// Returns null if no feed-level image is found.
   FeedImage? get feedImage {
     // Try Atom logo first
@@ -55,7 +55,7 @@ class AtomFeed {
         source: 'atom:logo',
       );
     }
-    
+
     // Try Atom icon
     if (icon != null && icon!.isNotEmpty) {
       return FeedImage(
@@ -63,16 +63,16 @@ class AtomFeed {
         source: 'atom:icon',
       );
     }
-    
+
     // No feed-level image found
     return null;
   }
-  
+
   /// Gets the best available image for the feed.
   /// Alias for feedImage to match RSS feed interface.
   FeedImage? get image => feedImage;
 
-  factory AtomFeed.parse(String xmlString) {
+  factory AtomFeed.parse(String xmlString, {bool withArticles = true}) {
     var document = XmlDocument.parse(xmlString);
     var feedElement = document.findElements('feed').firstOrNull;
     if (feedElement == null) {
@@ -97,10 +97,12 @@ class AtomFeed {
           .findElements('entry')
           .map((e) => AtomItem.parse(e))
           .toList(),
-      links: feedElement
-          .findElements('link')
-          .map((e) => AtomLink.parse(e))
-          .toList(),
+      links: withArticles
+          ? feedElement
+              .findElements('link')
+              .map((e) => AtomLink.parse(e))
+              .toList()
+          : null,
       authors: feedElement
           .findElements('author')
           .map((e) => AtomPerson.parse(e))

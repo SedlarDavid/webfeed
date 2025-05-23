@@ -62,13 +62,13 @@ class RssFeed {
     this.itunes,
     this.syndication,
   });
-  
+
   /// Gets the best available image for the feed.
-  /// 
+  ///
   /// This attempts to find the most suitable feed image from various possible sources:
   /// - RSS image
   /// - iTunes image
-  /// 
+  ///
   /// Returns null if no feed-level image is found.
   FeedImage? get feedImage {
     // Try RSS feed image first
@@ -79,20 +79,22 @@ class RssFeed {
         source: 'rss:image',
       );
     }
-    
+
     // Try iTunes image
-    if (itunes != null && itunes!.image != null && itunes!.image!.href != null) {
+    if (itunes != null &&
+        itunes!.image != null &&
+        itunes!.image!.href != null) {
       return FeedImage(
         url: itunes!.image!.href!,
         source: 'itunes:image',
       );
     }
-    
+
     // No feed-level image found
     return null;
   }
 
-  factory RssFeed.parse(String xmlString) {
+  factory RssFeed.parse(String xmlString, {bool withArticles = true}) {
     try {
       var document = XmlDocument.parse(xmlString);
 
@@ -132,10 +134,12 @@ class RssFeed {
         // Look for atom:link with type application/rss+xml and rel=self
         atomLink: _findAtomLink(channelElement),
 
-        items: itemContainer
-            .findAllElements('item')
-            .map((e) => RssItem.parse(e))
-            .toList(),
+        items: withArticles
+            ? itemContainer
+                .findAllElements('item')
+                .map((e) => RssItem.parse(e))
+                .toList()
+            : null,
 
         image: _parseImage(rdf, channelElement),
 

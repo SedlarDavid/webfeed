@@ -257,32 +257,81 @@ void main() {
     expect(item.content, null);
     expect(item.rights, null);
   });
-  
+
   test('Feed image getter for Atom feeds', () {
     // Test Atom feed with logo
     var xmlString = File('test/xml/Atom.xml').readAsStringSync();
     var feed = AtomFeed.parse(xmlString);
-    
+
     expect(feed.feedImage, isNotNull);
     expect(feed.feedImage!.url, 'http://foo.bar.news/logo.png');
     expect(feed.feedImage!.source, 'atom:logo');
-    
+
     // Test feed with no logo but with icon
     // Create a modified feed to test this condition
     xmlString = xmlString.replaceAll(
-      '<logo>http://foo.bar.news/logo.png</logo>', 
-      '<!-- removed logo for test -->'
-    );
+        '<logo>http://foo.bar.news/logo.png</logo>',
+        '<!-- removed logo for test -->');
     feed = AtomFeed.parse(xmlString);
-    
+
     expect(feed.feedImage, isNotNull);
     expect(feed.feedImage!.url, 'http://foo.bar.news/icon.png');
     expect(feed.feedImage!.source, 'atom:icon');
-    
+
     // Test feed with no feed-level images
     xmlString = File('test/xml/Atom-Empty.xml').readAsStringSync();
     feed = AtomFeed.parse(xmlString);
-    
+
     expect(feed.feedImage, isNull);
+  });
+
+  test('Atom feed URL dimension extraction', () {
+    // Test Atom feed with logo URL containing dimensions
+    const testAtomXml = '''<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Test Atom Feed</title>
+  <link href="http://example.com"/>
+  <id>http://example.com</id>
+  <updated>2024-01-01T00:00:00Z</updated>
+  <logo>http://example.com/logo_400x300.png</logo>
+</feed>''';
+
+    final feed = AtomFeed.parse(testAtomXml);
+    expect(feed.feedImage, isNotNull);
+    expect(feed.feedImage!.width, 400);
+    expect(feed.feedImage!.height, 300);
+    expect(feed.feedImage!.source, 'atom:logo');
+
+    // Test with icon and query parameters
+    const testAtomXmlIcon = '''<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Test Atom Feed</title>
+  <link href="http://example.com"/>
+  <id>http://example.com</id>
+  <updated>2024-01-01T00:00:00Z</updated>
+  <icon>http://example.com/icon.png?width=150&amp;height=150</icon>
+</feed>''';
+
+    final feedIcon = AtomFeed.parse(testAtomXmlIcon);
+    expect(feedIcon.feedImage, isNotNull);
+    expect(feedIcon.feedImage!.width, 150);
+    expect(feedIcon.feedImage!.height, 150);
+    expect(feedIcon.feedImage!.source, 'atom:icon');
+
+    // Test with alternative pattern
+    const testAtomXmlPattern = '''<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Test Atom Feed</title>
+  <link href="http://example.com"/>
+  <id>http://example.com</id>
+  <updated>2024-01-01T00:00:00Z</updated>
+  <logo>http://example.com/brand_w200_h100.svg</logo>
+</feed>''';
+
+    final feedPattern = AtomFeed.parse(testAtomXmlPattern);
+    expect(feedPattern.feedImage, isNotNull);
+    expect(feedPattern.feedImage!.width, 200);
+    expect(feedPattern.feedImage!.height, 100);
+    expect(feedPattern.feedImage!.source, 'atom:logo');
   });
 }

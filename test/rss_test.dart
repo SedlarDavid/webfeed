@@ -468,18 +468,23 @@ void main() {
 
     var feed = RssFeed.parse(xmlString);
     expect(feed.title, 'CNN.com - RSS Channel - App International Edition');
+    expect(feed.description,
+        'CNN.com delivers up-to-the-minute news and information on the latest top stories, weather, entertainment, politics and more.');
     expect(
-        feed.description, 'CNN.com delivers up-to-the-minute news and information on the latest top stories, weather, entertainment, politics and more.');
-    expect(feed.link, 'https://www.cnn.com/app-international-edition/index.html');
+        feed.link, 'https://www.cnn.com/app-international-edition/index.html');
     expect(feed.language, 'en-US');
     expect(feed.lastBuildDate, 'Thu, 22 Aug 2024 15:12:36 GMT');
     // Note: pubDate is in the XML but not parsed into the RssFeed class
-    expect(feed.copyright, 'Copyright (c) 2024 Turner Broadcasting System, Inc. All Rights Reserved.');
+    expect(feed.copyright,
+        'Copyright (c) 2024 Turner Broadcasting System, Inc. All Rights Reserved.');
     expect(feed.ttl, 10);
 
-    expect(feed.image!.title, 'CNN.com - RSS Channel - App International Edition');
-    expect(feed.image!.url, 'http://i2.cdn.turner.com/cnn/2015/images/09/24/cnn.digital.png');
-    expect(feed.image!.link, 'https://www.cnn.com/app-international-edition/index.html');
+    expect(
+        feed.image!.title, 'CNN.com - RSS Channel - App International Edition');
+    expect(feed.image!.url,
+        'http://i2.cdn.turner.com/cnn/2015/images/09/24/cnn.digital.png');
+    expect(feed.image!.link,
+        'https://www.cnn.com/app-international-edition/index.html');
 
     // Check multiple items exist
     expect(feed.items!.length > 1, true);
@@ -487,15 +492,17 @@ void main() {
     // Check first item
     var firstItem = feed.items!.first;
     expect(firstItem.title, 'Trump pleads not guilty to 34 felony counts');
-    expect(firstItem.link, 'https://edition.cnn.com/webview/politics/live-news/trump-indictment-stormy-daniels-news-04-03-23/index.html');
-    
+    expect(firstItem.link,
+        'https://edition.cnn.com/webview/politics/live-news/trump-indictment-stormy-daniels-news-04-03-23/index.html');
+
     // Verify media:group exists and has content
     expect(firstItem.media!.group, isNotNull);
     expect(firstItem.media!.group!.contents!.length > 5, true);
-    
+
     // Verify at least one media:content from the group
     var mediaContent = firstItem.media!.group!.contents!.first;
-    expect(mediaContent.url, 'https://cdn.cnn.com/cnnnext/dam/assets/230403164607-22-trump-indictment-travel-new-york-super-169.jpg');
+    expect(mediaContent.url,
+        'https://cdn.cnn.com/cnnnext/dam/assets/230403164607-22-trump-indictment-travel-new-york-super-169.jpg');
     expect(mediaContent.type, 'image/jpeg');
     expect(mediaContent.medium, 'image');
     expect(mediaContent.height, 619);
@@ -503,7 +510,8 @@ void main() {
 
     // Test the image getter on the first item
     expect(firstItem.image, isNotNull);
-    expect(firstItem.image!.url, 'https://cdn.cnn.com/cnnnext/dam/assets/230403164607-22-trump-indictment-travel-new-york-super-169.jpg');
+    expect(firstItem.image!.url,
+        'https://cdn.cnn.com/cnnnext/dam/assets/230403164607-22-trump-indictment-travel-new-york-super-169.jpg');
     expect(firstItem.image!.width, 1100);
     expect(firstItem.image!.height, 619);
     expect(firstItem.image!.type, 'image/jpeg');
@@ -511,48 +519,54 @@ void main() {
 
     // Check second item with more media information
     var secondItem = feed.items![1];
-    expect(secondItem.title, 'Haberman reveals why Trump attacked judge and his family in speech');
-    expect(secondItem.description, 'CNN political contributor Maggie Haberman explains the reasoning behind Donald Trump\'s attacks on the judge and his family during a speech at his Mar-a-Lago resort after he was arraigned on felony charges.');
+    expect(secondItem.title,
+        'Haberman reveals why Trump attacked judge and his family in speech');
+    expect(secondItem.description,
+        'CNN political contributor Maggie Haberman explains the reasoning behind Donald Trump\'s attacks on the judge and his family during a speech at his Mar-a-Lago resort after he was arraigned on felony charges.');
     expect(secondItem.pubDate, DateTime(2023, 04, 05, 13, 30, 09));
-    
+
     // Verify media:group exists in second item
     expect(secondItem.media!.group, isNotNull);
     expect(secondItem.media!.group!.contents!.length > 5, true);
-    
+
     // Test the image getter on the second item
     expect(secondItem.image, isNotNull);
-    expect(secondItem.image!.url, contains('https://cdn.cnn.com/cnnnext/dam/assets/230405092519-trump-haberman-split'));
+    expect(
+        secondItem.image!.url,
+        contains(
+            'https://cdn.cnn.com/cnnnext/dam/assets/230405092519-trump-haberman-split'));
     expect(secondItem.image!.source, 'media:group/media:content');
   });
-  
+
   test('Image getter with different feed types', () {
     // Test with RSS-Media.xml which has various media types
     var xmlString = File('test/xml/RSS-Media.xml').readAsStringSync();
     var feed = RssFeed.parse(xmlString);
     var item = feed.items!.first;
-    
+
     // Should be able to extract an image
     expect(item.image, isNotNull);
     expect(item.image!.url, isNotEmpty);
-    
+
     // Test with RSS-Itunes.xml which has iTunes images
     xmlString = File('test/xml/RSS-Itunes.xml').readAsStringSync();
     feed = RssFeed.parse(xmlString);
     item = feed.items!.first;
-    
+
     // Should extract iTunes image
     expect(item.image, isNotNull);
-    expect(item.image!.url, 'https://cdn.changelog.com/uploads/covers/go-time-original.png?v=63725770357');
+    expect(item.image!.url,
+        'https://cdn.changelog.com/uploads/covers/go-time-original.png?v=63725770357');
     expect(item.image!.source, 'itunes:image');
-    
+
     // Test with RSS-Empty.xml which has no images
     xmlString = File('test/xml/RSS-Empty.xml').readAsStringSync();
     feed = RssFeed.parse(xmlString);
     item = feed.items!.first;
-    
+
     // Should not extract an image
     expect(item.image, isNull);
-    
+
     // Check that RssItemImage class has all required properties
     final someImage = feed.items!.first.image ?? item.image;
     if (someImage != null) {
@@ -563,37 +577,105 @@ void main() {
       expect(someImage.type, isA<String?>());
     }
   });
-  
+
   test('Feed image getter for RSS feeds', () {
     // Test RSS feed with standard image
     var xmlString = File('test/xml/RSS.xml').readAsStringSync();
     var feed = RssFeed.parse(xmlString);
-    
+
     expect(feed.feedImage, isNotNull);
     expect(feed.feedImage!.url, 'https://foo.bar.news/logo.gif');
     expect(feed.feedImage!.title, 'Foo bar News');
     expect(feed.feedImage!.source, 'rss:image');
-    
+
     // Test RSS feed with iTunes image
     xmlString = File('test/xml/RSS-Itunes.xml').readAsStringSync();
     feed = RssFeed.parse(xmlString);
-    
+
     expect(feed.feedImage, isNotNull);
-    expect(feed.feedImage!.url, contains('https://cdn.changelog.com/uploads/covers/go-time-original.png'));
+    expect(
+        feed.feedImage!.url,
+        contains(
+            'https://cdn.changelog.com/uploads/covers/go-time-original.png'));
     expect(feed.feedImage!.source, equals('itunes:image'));
-    
+
     // Test RSS feed with no standard feed-level image
     xmlString = File('test/xml/RSS-Media.xml').readAsStringSync();
     feed = RssFeed.parse(xmlString);
-    
+
     // Should not find a feed-level image now
     expect(feed.feedImage, isNull);
-    
+
     // Test feed with no images at all
     xmlString = File('test/xml/RSS-Empty.xml').readAsStringSync();
     feed = RssFeed.parse(xmlString);
-    
+
     // With no item images, should try to fall back but not find any
     expect(feed.feedImage, isNull);
+  });
+
+  test('URL dimension extraction', () {
+    // Test _extractDimensionsFromUrl function through reflection or by creating a test feed
+    // Since the method is static and private, we'll test it indirectly
+
+    // Create a test RSS feed XML with an image URL containing dimensions
+    const testXml = '''<?xml version="1.0"?>
+<rss version="2.0">
+  <channel>
+    <title>Test Feed</title>
+    <description>Test</description>
+    <link>http://example.com</link>
+    <image>
+      <title>Test Image</title>
+      <url>https://example.com/logo_300x200.jpg</url>
+      <link>http://example.com</link>
+    </image>
+  </channel>
+</rss>''';
+
+    final feed = RssFeed.parse(testXml);
+    expect(feed.feedImage, isNotNull);
+    expect(feed.feedImage!.width, 300);
+    expect(feed.feedImage!.height, 200);
+
+    // Test with query parameters
+    const testXmlQuery = '''<?xml version="1.0"?>
+<rss version="2.0">
+  <channel>
+    <title>Test Feed</title>
+    <description>Test</description>
+    <link>http://example.com</link>
+    <image>
+      <title>Test Image</title>
+      <url>https://example.com/logo.jpg?w=400&amp;h=300</url>
+      <link>http://example.com</link>
+    </image>
+  </channel>
+</rss>''';
+
+    final feedQuery = RssFeed.parse(testXmlQuery);
+    expect(feedQuery.feedImage, isNotNull);
+    expect(feedQuery.feedImage!.width, 400);
+    expect(feedQuery.feedImage!.height, 300);
+
+    // Test with alternative pattern
+    const testXmlPattern = '''<?xml version="1.0"?>
+<rss version="2.0">
+  <channel>
+    <title>Test Feed</title>
+    <description>Test</description>
+    <link>http://example.com</link>
+    <image>
+      <title>Test Image</title>
+      <url>https://example.com/logo_w500_h350.png</url>
+      <link>http://example.com</link>
+    </image>
+  </channel>
+</rss>''';
+
+    final feedPattern = RssFeed.parse(testXmlPattern);
+    expect(feedPattern.feedImage, isNotNull);
+    expect(feedPattern.feedImage!.width, 500);
+    expect(feedPattern.feedImage!.height, 350);
   });
 }

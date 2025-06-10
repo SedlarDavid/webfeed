@@ -13,13 +13,13 @@ import 'package:xml/xml.dart';
 class FeedImage {
   /// URL of the image
   final String url;
-  
+
   /// Optional width of the image (may be null if not available)
   final int? width;
-  
+
   /// Optional height of the image (may be null if not available)
   final int? height;
-  
+
   /// Optional image type/MIME type (may be null if not available)
   final String? type;
 
@@ -77,14 +77,14 @@ class RssItem {
   });
 
   /// Gets the best available image from the RSS item
-  /// 
+  ///
   /// This attempts to find the most suitable image from various possible sources:
   /// - media:content with medium="image" and largest available resolution
   /// - media:thumbnail with largest available resolution
   /// - itunes:image
   /// - enclosure with image type
   /// - image URL extracted from content
-  /// 
+  ///
   /// Returns null if no image is found.
   FeedImage? get image {
     // Try media:content items first (prefer those in media:group if available)
@@ -92,12 +92,12 @@ class RssItem {
       // First look for images in media:group
       if (media!.group != null && media!.group!.contents != null) {
         final mediaContents = media!.group!.contents!
-            .where((content) => 
-                content.medium == 'image' && 
+            .where((content) =>
+                content.medium == 'image' &&
                 content.url != null &&
                 content.url!.isNotEmpty)
             .toList();
-            
+
         if (mediaContents.isNotEmpty) {
           // Sort by size (larger is better)
           mediaContents.sort((a, b) {
@@ -105,7 +105,7 @@ class RssItem {
             final bSize = (b.width ?? 0) * (b.height ?? 0);
             return bSize.compareTo(aSize);
           });
-          
+
           final bestContent = mediaContents.first;
           return FeedImage(
             url: bestContent.url!,
@@ -116,16 +116,16 @@ class RssItem {
           );
         }
       }
-      
+
       // Then check standalone media:content
       if (media!.contents != null && media!.contents!.isNotEmpty) {
         final mediaContents = media!.contents!
-            .where((content) => 
-                content.medium == 'image' && 
+            .where((content) =>
+                content.medium == 'image' &&
                 content.url != null &&
                 content.url!.isNotEmpty)
             .toList();
-            
+
         if (mediaContents.isNotEmpty) {
           // Sort by size (larger is better)
           mediaContents.sort((a, b) {
@@ -133,7 +133,7 @@ class RssItem {
             final bSize = (b.width ?? 0) * (b.height ?? 0);
             return bSize.compareTo(aSize);
           });
-          
+
           final bestContent = mediaContents.first;
           return FeedImage(
             url: bestContent.url!,
@@ -144,13 +144,13 @@ class RssItem {
           );
         }
       }
-      
+
       // Check media:thumbnail
       if (media!.thumbnails != null && media!.thumbnails!.isNotEmpty) {
         final thumbnails = media!.thumbnails!
             .where((thumb) => thumb.url != null && thumb.url!.isNotEmpty)
             .toList();
-            
+
         if (thumbnails.isNotEmpty) {
           // Sort by size (larger is better), but we need to parse string dimensions
           thumbnails.sort((a, b) {
@@ -158,12 +158,12 @@ class RssItem {
             final aHeight = int.tryParse(a.height ?? '0') ?? 0;
             final bWidth = int.tryParse(b.width ?? '0') ?? 0;
             final bHeight = int.tryParse(b.height ?? '0') ?? 0;
-            
+
             final aSize = aWidth * aHeight;
             final bSize = bWidth * bHeight;
             return bSize.compareTo(aSize);
           });
-          
+
           final bestThumbnail = thumbnails.first;
           return FeedImage(
             url: bestThumbnail.url!,
@@ -174,40 +174,120 @@ class RssItem {
         }
       }
     }
-    
+
     // Try iTunes image
-    if (itunes != null && itunes!.image != null && itunes!.image!.href != null) {
+    if (itunes != null &&
+        itunes!.image != null &&
+        itunes!.image!.href != null) {
+      final (width, height) =
+          _extractDimensionsFromUrl(itunes!.image!.href!) ?? (null, null);
       return FeedImage(
         url: itunes!.image!.href!,
+        width: width,
+        height: height,
         source: 'itunes:image',
       );
     }
-    
+
     // Try enclosure (if it's an image type)
     if (enclosure != null && enclosure!.url != null) {
-      final isImage = enclosure!.type != null && 
-                     (enclosure!.type!.startsWith('image/') || 
-                      enclosure!.type == 'image');
-      
+      final isImage = enclosure!.type != null &&
+          (enclosure!.type!.startsWith('image/') || enclosure!.type == 'image');
+
       if (isImage) {
+        final (width, height) =
+            _extractDimensionsFromUrl(enclosure!.url!) ?? (null, null);
         return FeedImage(
           url: enclosure!.url!,
+          width: width,
+          height: height,
           type: enclosure!.type,
           source: 'enclosure',
         );
       }
     }
-    
+
     // Try to extract from content
     if (content != null && content!.images.isNotEmpty) {
+      final (width, height) =
+          _extractDimensionsFromUrl(content!.images.first) ?? (null, null);
       return FeedImage(
         url: content!.images.first,
+        width: width,
+        height: height,
         source: 'content:encoded',
       );
     }
-    
+
     // No image found
     return null;
+  }
+
+  /// Helper function to extract width and height from image URLs
+  ///
+  /// Looks for common patterns in URLs like:
+  /// - /image_100x200.jpg
+  /// - /image-width-100-height-200.jpg
+  /// - /image_w100_h200.jpg
+  /// - /image.jpg?w=100&h=200
+  ///
+  /// Returns a record with (width, height) if found, null otherwise
+  static (int, int)? _extractDimensionsFromUrl(String url) {
+    try {
+      // Pattern 1: filename_WIDTHxHEIGHT.ext (e.g., image_300x200.jpg)
+      final dimensionPattern1 = RegExp(r'_(\d+)x(\d+)\.');
+      final match1 = dimensionPattern1.firstMatch(url);
+      if (match1 != null) {
+        final width = int.tryParse(match1.group(1)!);
+        final height = int.tryParse(match1.group(2)!);
+        if (width != null && height != null) {
+          return (width, height);
+        }
+      }
+
+      // Pattern 2: filename-width-W-height-H.ext (e.g., image-width-300-height-200.jpg)
+      final dimensionPattern2 = RegExp(r'-width-(\d+)-height-(\d+)\.');
+      final match2 = dimensionPattern2.firstMatch(url);
+      if (match2 != null) {
+        final width = int.tryParse(match2.group(1)!);
+        final height = int.tryParse(match2.group(2)!);
+        if (width != null && height != null) {
+          return (width, height);
+        }
+      }
+
+      // Pattern 3: filename_wW_hH.ext (e.g., image_w300_h200.jpg)
+      final dimensionPattern3 = RegExp(r'_w(\d+)_h(\d+)\.');
+      final match3 = dimensionPattern3.firstMatch(url);
+      if (match3 != null) {
+        final width = int.tryParse(match3.group(1)!);
+        final height = int.tryParse(match3.group(2)!);
+        if (width != null && height != null) {
+          return (width, height);
+        }
+      }
+
+      // Pattern 4: query parameters (e.g., image.jpg?w=300&h=200 or image.jpg?width=300&height=200)
+      final uri = Uri.tryParse(url);
+      if (uri != null) {
+        final widthParam =
+            uri.queryParameters['w'] ?? uri.queryParameters['width'];
+        final heightParam =
+            uri.queryParameters['h'] ?? uri.queryParameters['height'];
+
+        if (widthParam != null && heightParam != null) {
+          final width = int.tryParse(widthParam);
+          final height = int.tryParse(heightParam);
+          if (width != null && height != null) {
+            return (width, height);
+          }
+        }
+      }
+
+      return null;
+    } catch (e) {
+      return null;
+    }
   }
 
   factory RssItem.parse(XmlElement element) {

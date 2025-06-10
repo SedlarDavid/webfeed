@@ -678,4 +678,75 @@ void main() {
     expect(feedPattern.feedImage!.width, 500);
     expect(feedPattern.feedImage!.height, 350);
   });
+
+  test('RSS item URL dimension extraction', () {
+    // Test RSS item with iTunes image URL containing dimensions
+    const testXml = '''<?xml version="1.0"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>Test Feed</title>
+    <description>Test</description>
+    <link>http://example.com</link>
+    <item>
+      <title>Test Episode</title>
+      <description>Test episode description</description>
+      <link>http://example.com/episode1</link>
+      <itunes:image href="http://example.com/episode_600x400.jpg"/>
+    </item>
+  </channel>
+</rss>''';
+
+    final feed = RssFeed.parse(testXml);
+    final item = feed.items!.first;
+    expect(item.image, isNotNull);
+    expect(item.image!.width, 600);
+    expect(item.image!.height, 400);
+    expect(item.image!.source, 'itunes:image');
+
+    // Test with enclosure
+    const testXmlEnclosure = '''<?xml version="1.0"?>
+<rss version="2.0">
+  <channel>
+    <title>Test Feed</title>
+    <description>Test</description>
+    <link>http://example.com</link>
+    <item>
+      <title>Test Episode</title>
+      <description>Test episode description</description>
+      <link>http://example.com/episode1</link>
+      <enclosure url="http://example.com/thumb_w250_h180.png" type="image/png" length="12345"/>
+    </item>
+  </channel>
+</rss>''';
+
+    final feedEnclosure = RssFeed.parse(testXmlEnclosure);
+    final itemEnclosure = feedEnclosure.items!.first;
+    expect(itemEnclosure.image, isNotNull);
+    expect(itemEnclosure.image!.width, 250);
+    expect(itemEnclosure.image!.height, 180);
+    expect(itemEnclosure.image!.source, 'enclosure');
+
+    // Test with content image using query parameters
+    const testXmlContent = '''<?xml version="1.0"?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Test Feed</title>
+    <description>Test</description>
+    <link>http://example.com</link>
+    <item>
+      <title>Test Episode</title>
+      <description>Test episode description</description>
+      <link>http://example.com/episode1</link>
+      <content:encoded><![CDATA[<p>Some content with <img src="http://example.com/content.jpg?width=800&amp;height=600" alt="test"/></p>]]></content:encoded>
+    </item>
+  </channel>
+</rss>''';
+
+    final feedContent = RssFeed.parse(testXmlContent);
+    final itemContent = feedContent.items!.first;
+    expect(itemContent.image, isNotNull);
+    expect(itemContent.image!.width, 800);
+    expect(itemContent.image!.height, 600);
+    expect(itemContent.image!.source, 'content:encoded');
+  });
 }

@@ -334,4 +334,54 @@ void main() {
     expect(feedPattern.feedImage!.height, 100);
     expect(feedPattern.feedImage!.source, 'atom:logo');
   });
+
+  test('Atom item URL dimension extraction', () {
+    // Test Atom item with enclosure link containing dimensions
+    const testAtomXml = '''<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Test Atom Feed</title>
+  <link href="http://example.com"/>
+  <id>http://example.com</id>
+  <updated>2024-01-01T00:00:00Z</updated>
+  <entry>
+    <title>Test Entry</title>
+    <id>http://example.com/entry1</id>
+    <updated>2024-01-01T00:00:00Z</updated>
+    <link rel="enclosure" href="http://example.com/image_500x300.jpg" type="image/jpeg"/>
+  </entry>
+</feed>''';
+
+    final feed = AtomFeed.parse(testAtomXml);
+    final item = feed.items!.first;
+    expect(item.image, isNotNull);
+    expect(item.image!.width, 500);
+    expect(item.image!.height, 300);
+    expect(item.image!.source, 'atom:link[rel=enclosure]');
+
+    // Test with source logo containing dimensions in different pattern
+    const testAtomXmlSource = '''<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Test Atom Feed</title>
+  <link href="http://example.com"/>
+  <id>http://example.com</id>
+  <updated>2024-01-01T00:00:00Z</updated>
+  <entry>
+    <title>Test Entry</title>
+    <id>http://example.com/entry1</id>
+    <updated>2024-01-01T00:00:00Z</updated>
+    <source>
+      <id>http://source.example.com</id>
+      <title>Source Feed</title>
+      <logo>http://source.example.com/logo-width-320-height-240.png</logo>
+    </source>
+  </entry>
+</feed>''';
+
+    final feedSource = AtomFeed.parse(testAtomXmlSource);
+    final itemSource = feedSource.items!.first;
+    expect(itemSource.image, isNotNull);
+    expect(itemSource.image!.width, 320);
+    expect(itemSource.image!.height, 240);
+    expect(itemSource.image!.source, 'atom:source/logo');
+  });
 }

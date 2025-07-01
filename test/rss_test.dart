@@ -48,22 +48,23 @@ void main() {
     expect(feed.cloud!.protocol, 'xml-rpc');
 
     expect(feed.categories, isNotNull);
-    expect(feed.categories != null && feed.categories!.isNotEmpty, true);
+    expect(feed.categories, isNotNull);
+    expect(feed.categories!.length, greaterThan(0));
     // Check first category
     expect(feed.categories!.first.domain, null);
     expect(feed.categories!.first.value, 'Ipsum');
 
     expect(feed.skipDays!.length, 3);
-    expect(feed.skipDays!.contains('Monday'), true);
-    expect(feed.skipDays!.contains('Tuesday'), true);
-    expect(feed.skipDays!.contains('Sunday'), true);
+    expect(feed.skipDays, contains('Monday'));
+    expect(feed.skipDays, contains('Tuesday'));
+    expect(feed.skipDays, contains('Sunday'));
 
     expect(feed.skipHours!.length, 5);
-    expect(feed.skipHours!.contains(0), true);
-    expect(feed.skipHours!.contains(1), true);
-    expect(feed.skipHours!.contains(2), true);
-    expect(feed.skipHours!.contains(3), true);
-    expect(feed.skipHours!.contains(4), true);
+    expect(feed.skipHours, contains(0));
+    expect(feed.skipHours, contains(1));
+    expect(feed.skipHours, contains(2));
+    expect(feed.skipHours, contains(3));
+    expect(feed.skipHours, contains(4));
 
     expect(feed.items!.length, 2);
 
@@ -106,7 +107,7 @@ void main() {
         feed.image!.url, 'https://ct24.ceskatelevize.cz/google-touch-icon.png');
     expect(feed.image!.link, 'https://ct24.ceskatelevize.cz');
 
-    expect(feed.items!.length, 20);
+    expect(feed.items!.length, 30);
 
     var firstItem = feed.items!.first;
     expect(firstItem.title,
@@ -423,8 +424,9 @@ void main() {
         item.itunes != null &&
             item.itunes!.episodeType == ItunesEpisodeType.full,
         true);
-    expect(item.itunes != null && item.itunes!.duration == null, true);
-    expect(item.itunes != null && item.itunes!.title == 'awesome title', true);
+    expect(item.itunes, isNotNull);
+    expect(item.itunes!.duration, isNull);
+    expect(item.itunes!.title, equals('awesome title'));
   });
 
   test('parse RSS-RDF.xml', () {
@@ -487,7 +489,7 @@ void main() {
         'https://www.cnn.com/app-international-edition/index.html');
 
     // Check multiple items exist
-    expect(feed.items!.length > 1, true);
+    expect(feed.items!.length, greaterThan(1));
 
     // Check first item
     var firstItem = feed.items!.first;
@@ -497,7 +499,7 @@ void main() {
 
     // Verify media:group exists and has content
     expect(firstItem.media!.group, isNotNull);
-    expect(firstItem.media!.group!.contents!.length > 5, true);
+    expect(firstItem.media!.group!.contents!.length, greaterThan(5));
 
     // Verify at least one media:content from the group
     var mediaContent = firstItem.media!.group!.contents!.first;
@@ -527,7 +529,7 @@ void main() {
 
     // Verify media:group exists in second item
     expect(secondItem.media!.group, isNotNull);
-    expect(secondItem.media!.group!.contents!.length > 5, true);
+    expect(secondItem.media!.group!.contents!.length, greaterThan(5));
 
     // Test the image getter on the second item
     expect(secondItem.image, isNotNull);

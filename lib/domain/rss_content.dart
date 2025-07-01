@@ -34,7 +34,7 @@ class RssContent {
 
     // Extract background images
     final cssImageRegExp = RegExp(
-      'background-image:\\s*url\\([\'\"]?([^\'\"]+)\\)',
+      'background-image:\\s*url\\([\'\"]?([^\'\"]*?)[\'\"]?\\)',
       caseSensitive: false,
       multiLine: true,
     );

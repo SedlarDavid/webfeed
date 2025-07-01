@@ -17,15 +17,16 @@ void main() {
           </channel>
         </rss>
       ''';
-      
+
       final feed = RssFeed.parse(xmlString);
-      
+
       expect(feed.title, 'UTF-8 Test 🌍');
       expect(feed.description, 'Testing UTF-8 characters like: ñáéíóúçãõ');
       expect(feed.items![0].title, 'UTF-8 Item ✅');
-      expect(feed.items![0].description, 'Item with emoji 📱 and special chars »«¿¡');
+      expect(feed.items![0].description,
+          'Item with emoji 📱 and special chars »«¿¡');
     });
-    
+
     test('Handle HTML entities in content', () {
       final xmlString = '''
         <?xml version="1.0" encoding="UTF-8"?>
@@ -45,23 +46,25 @@ void main() {
           </channel>
         </rss>
       ''';
-      
+
       final feed = RssFeed.parse(xmlString);
-      
+
       expect(feed.title, 'HTML Entity Test');
       expect(feed.items![0].title, 'Item with &, <, >, " entities');
-      expect(feed.items![0].description, 'Text with &quot;quoted&quot; content');
-      
+      expect(
+          feed.items![0].description, 'Text with &quot;quoted&quot; content');
+
       // Content should preserve the CDATA content
       expect(feed.items![0].content, isNotNull);
-      expect(feed.items![0].content!.value.contains('<strong>bold text</strong>'), true);
-      
+      expect(feed.items![0].content!.value,
+          contains('<strong>bold text</strong>'));
+
       // Plain text should decode entities
       expect(feed.items![0].content!.plainText, isNotNull);
-      expect(feed.items![0].content!.plainText!.contains('bold text'), true);
-      expect(feed.items![0].content!.plainText!.contains('<strong>'), false);
+      expect(feed.items![0].content!.plainText, contains('bold text'));
+      expect(feed.items![0].content!.plainText, isNot(contains('<strong>')));
     });
-    
+
     test('Handle CDATA sections', () {
       final xmlString = '''
         <?xml version="1.0" encoding="UTF-8"?>
@@ -79,14 +82,14 @@ void main() {
           </channel>
         </rss>
       ''';
-      
+
       final feed = RssFeed.parse(xmlString);
-      
+
       expect(feed.title, 'CDATA Test');
       expect(feed.description, 'This description has <b>HTML</b> in CDATA');
       expect(feed.items![0].title, 'CDATA Title with <em>emphasis</em>');
-      expect(feed.items![0].description!.contains('line breaks'), true);
-      expect(feed.items![0].description!.contains('<a href='), true);
+      expect(feed.items![0].description, contains('line breaks'));
+      expect(feed.items![0].description, contains('<a href='));
     });
   });
 }

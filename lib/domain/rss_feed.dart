@@ -7,6 +7,7 @@ import 'package:webfeed/domain/rss_cloud.dart';
 import 'package:webfeed/domain/rss_image.dart';
 import 'package:webfeed/domain/rss_item.dart';
 import 'package:webfeed/domain/syndication/syndication.dart';
+import 'package:webfeed/util/datetime.dart';
 import 'package:webfeed/util/iterable.dart';
 import 'package:webfeed/util/xml.dart';
 import 'package:xml/xml.dart';
@@ -336,5 +337,133 @@ class RssFeed {
     }
 
     return null;
+  }
+
+  /// Efficient parsing method for large XML files
+  /// Uses regex-based parsing instead of full DOM parsing for better performance
+  static RssFeed parseEfficiently(String xmlString,
+      {bool withArticles = true}) {
+    try {
+      // Extract basic metadata using regex for speed
+      final titleMatch = RegExp(r'<title[^>]*>(.*?)</title>', dotAll: true)
+          .firstMatch(xmlString);
+      final descriptionMatch =
+          RegExp(r'<description[^>]*>(.*?)</description>', dotAll: true)
+              .firstMatch(xmlString);
+      final linkMatch = RegExp(r'<link[^>]*>(.*?)</link>', dotAll: true)
+          .firstMatch(xmlString);
+      final languageMatch =
+          RegExp(r'<language[^>]*>(.*?)</language>', dotAll: true)
+              .firstMatch(xmlString);
+      final generatorMatch =
+          RegExp(r'<generator[^>]*>(.*?)</generator>', dotAll: true)
+              .firstMatch(xmlString);
+      final copyrightMatch =
+          RegExp(r'<copyright[^>]*>(.*?)</copyright>', dotAll: true)
+              .firstMatch(xmlString);
+      final lastBuildDateMatch =
+          RegExp(r'<lastBuildDate[^>]*>(.*?)</lastBuildDate>', dotAll: true)
+              .firstMatch(xmlString);
+
+      // Parse items efficiently if requested
+      List<RssItem>? items;
+      if (withArticles) {
+        items = _parseItemsEfficiently(xmlString);
+      }
+
+      return RssFeed(
+        title: _cleanText(titleMatch?.group(1)),
+        description: _cleanText(descriptionMatch?.group(1)),
+        link: _cleanText(linkMatch?.group(1)),
+        language: _cleanText(languageMatch?.group(1)),
+        generator: _cleanText(generatorMatch?.group(1)),
+        copyright: _cleanText(copyrightMatch?.group(1)),
+        lastBuildDate: _cleanText(lastBuildDateMatch?.group(1)),
+        items: items,
+        // Note: Image, cloud, categories, skipDays, skipHours, and other fields
+        // would need more complex parsing and are set to null for efficiency
+        image: null,
+        cloud: null,
+        categories: null,
+        skipDays: null,
+        skipHours: null,
+        author: null,
+        managingEditor: null,
+        rating: null,
+        webMaster: null,
+        atomLink: null,
+        ttl: null,
+        docs: null,
+        dc: null,
+        itunes: null,
+        syndication: null,
+      );
+    } catch (e) {
+      throw ArgumentError(
+          'Failed to parse RSS feed efficiently: ${e.toString()}');
+    }
+  }
+
+  /// Parse items using regex for better performance
+  static List<RssItem> _parseItemsEfficiently(String xmlString) {
+    final items = <RssItem>[];
+    final itemPattern = RegExp(r'<item[^>]*>(.*?)</item>', dotAll: true);
+
+    for (final match in itemPattern.allMatches(xmlString)) {
+      final itemXml = match.group(0)!;
+      final item = _parseItemEfficiently(itemXml);
+      if (item != null) {
+        items.add(item);
+      }
+    }
+
+    return items;
+  }
+
+  /// Parse a single item efficiently
+  static RssItem? _parseItemEfficiently(String itemXml) {
+    try {
+      final titleMatch = RegExp(r'<title[^>]*>(.*?)</title>', dotAll: true)
+          .firstMatch(itemXml);
+      final descriptionMatch =
+          RegExp(r'<description[^>]*>(.*?)</description>', dotAll: true)
+              .firstMatch(itemXml);
+      final linkMatch =
+          RegExp(r'<link[^>]*>(.*?)</link>', dotAll: true).firstMatch(itemXml);
+      final guidMatch =
+          RegExp(r'<guid[^>]*>(.*?)</guid>', dotAll: true).firstMatch(itemXml);
+      final pubDateMatch =
+          RegExp(r'<pubDate[^>]*>(.*?)</pubDate>', dotAll: true)
+              .firstMatch(itemXml);
+      final authorMatch = RegExp(r'<author[^>]*>(.*?)</author>', dotAll: true)
+          .firstMatch(itemXml);
+
+      return RssItem(
+        title: _cleanText(titleMatch?.group(1)),
+        description: _cleanText(descriptionMatch?.group(1)),
+        link: _cleanText(linkMatch?.group(1)),
+        guid: _cleanText(guidMatch?.group(1)),
+        pubDate: parseDateTime(_cleanText(pubDateMatch?.group(1))),
+        author: _cleanText(authorMatch?.group(1)),
+        // Note: Categories, comments, source, content, media, enclosure, and other fields
+        // would need more complex parsing and are set to null for efficiency
+        categories: null,
+        comments: null,
+        source: null,
+        content: null,
+        media: null,
+        enclosure: null,
+        dc: null,
+        itunes: null,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Clean text content
+  static String? _cleanText(String? text) {
+    if (text == null) return null;
+    return text.trim().replaceAll(RegExp(r'\s+'), ' ');
   }
 }

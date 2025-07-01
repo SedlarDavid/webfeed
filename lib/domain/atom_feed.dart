@@ -210,4 +210,116 @@ class AtomFeed {
           feedElement.findElements('subtitle').firstOrNull?.innerText.trim(),
     );
   }
+
+  /// Efficient parsing method for large XML files
+  /// Uses regex-based parsing instead of full DOM parsing for better performance
+  static AtomFeed parseEfficiently(String xmlString,
+      {bool withArticles = true}) {
+    try {
+      // Extract basic metadata using regex for speed
+      final titleMatch = RegExp(r'<title[^>]*>(.*?)</title>', dotAll: true)
+          .firstMatch(xmlString);
+      final idMatch =
+          RegExp(r'<id[^>]*>(.*?)</id>', dotAll: true).firstMatch(xmlString);
+      final updatedMatch =
+          RegExp(r'<updated[^>]*>(.*?)</updated>', dotAll: true)
+              .firstMatch(xmlString);
+      final iconMatch = RegExp(r'<icon[^>]*>(.*?)</icon>', dotAll: true)
+          .firstMatch(xmlString);
+      final logoMatch = RegExp(r'<logo[^>]*>(.*?)</logo>', dotAll: true)
+          .firstMatch(xmlString);
+      final rightsMatch = RegExp(r'<rights[^>]*>(.*?)</rights>', dotAll: true)
+          .firstMatch(xmlString);
+      final subtitleMatch =
+          RegExp(r'<subtitle[^>]*>(.*?)</subtitle>', dotAll: true)
+              .firstMatch(xmlString);
+
+      // Parse items efficiently if requested
+      List<AtomItem>? items;
+      if (withArticles) {
+        items = _parseItemsEfficiently(xmlString);
+      }
+
+      return AtomFeed(
+        id: _cleanText(idMatch?.group(1)),
+        title: _cleanText(titleMatch?.group(1)),
+        updated: parseDateTime(_cleanText(updatedMatch?.group(1))),
+        items: items,
+        icon: _cleanText(iconMatch?.group(1)),
+        logo: _cleanText(logoMatch?.group(1)),
+        rights: _cleanText(rightsMatch?.group(1)),
+        subtitle: _cleanText(subtitleMatch?.group(1)),
+        // Note: Links, authors, contributors, categories, and generator
+        // would need more complex parsing and are set to null for efficiency
+        links: null,
+        authors: null,
+        contributors: null,
+        categories: null,
+        generator: null,
+      );
+    } catch (e) {
+      throw ArgumentError(
+          'Failed to parse Atom feed efficiently: ${e.toString()}');
+    }
+  }
+
+  /// Parse items using regex for better performance
+  static List<AtomItem> _parseItemsEfficiently(String xmlString) {
+    final items = <AtomItem>[];
+    final entryPattern = RegExp(r'<entry[^>]*>(.*?)</entry>', dotAll: true);
+
+    for (final match in entryPattern.allMatches(xmlString)) {
+      final entryXml = match.group(0)!;
+      final item = _parseItemEfficiently(entryXml);
+      if (item != null) {
+        items.add(item);
+      }
+    }
+
+    return items;
+  }
+
+  /// Parse a single item efficiently
+  static AtomItem? _parseItemEfficiently(String entryXml) {
+    try {
+      final titleMatch = RegExp(r'<title[^>]*>(.*?)</title>', dotAll: true)
+          .firstMatch(entryXml);
+      final idMatch =
+          RegExp(r'<id[^>]*>(.*?)</id>', dotAll: true).firstMatch(entryXml);
+      final updatedMatch =
+          RegExp(r'<updated[^>]*>(.*?)</updated>', dotAll: true)
+              .firstMatch(entryXml);
+      final summaryMatch =
+          RegExp(r'<summary[^>]*>(.*?)</summary>', dotAll: true)
+              .firstMatch(entryXml);
+      final contentMatch =
+          RegExp(r'<content[^>]*>(.*?)</content>', dotAll: true)
+              .firstMatch(entryXml);
+
+      return AtomItem(
+        title: _cleanText(titleMatch?.group(1)),
+        id: _cleanText(idMatch?.group(1)),
+        updated: parseDateTime(_cleanText(updatedMatch?.group(1))),
+        summary: _cleanText(summaryMatch?.group(1)),
+        content: _cleanText(contentMatch?.group(1)),
+        // Note: Links, authors, contributors, categories, and other fields
+        // would need more complex parsing and are set to null for efficiency
+        links: null,
+        authors: null,
+        contributors: null,
+        categories: null,
+        published: null,
+        rights: null,
+        source: null,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Clean text content
+  static String? _cleanText(String? text) {
+    if (text == null) return null;
+    return text.trim().replaceAll(RegExp(r'\s+'), ' ');
+  }
 }

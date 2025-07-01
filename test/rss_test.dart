@@ -5,6 +5,7 @@ import 'package:test/test.dart';
 import 'package:webfeed/domain/itunes/itunes_episode_type.dart';
 import 'package:webfeed/domain/itunes/itunes_type.dart';
 import 'package:webfeed/domain/syndication/syndication.dart';
+import 'package:webfeed/util/datetime.dart';
 import 'package:webfeed/webfeed.dart';
 
 void main() {
@@ -118,7 +119,7 @@ void main() {
         'https://ct24.ceskatelevize.cz/clanek/domaci/uspech-zeme-zavisi-na-tom-jak-se-zmeni-eu-rekl-fiala-na-konferenci-cesko-na-krizovatce-360078');
     expect(firstItem.guid,
         'https://ct24.ceskatelevize.cz/clanek/domaci/uspech-zeme-zavisi-na-tom-jak-se-zmeni-eu-rekl-fiala-na-konferenci-cesko-na-krizovatce-360078');
-    expect(firstItem.pubDate, DateTime.parse('Tue, 15 Apr 2025 11:26:56 GMT'));
+    expect(firstItem.pubDate, parseDateTime('Tue, 15 Apr 2025 11:26:56 GMT'));
     expect(firstItem.categories!.first.domain,
         'https://ct24.ceskatelevize.cz/rubrika/domaci-5');
     expect(firstItem.categories!.first.value, 'Domácí');

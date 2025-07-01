@@ -51,8 +51,7 @@ void main() {
 
       expect(feed.title, 'HTML Entity Test');
       expect(feed.items![0].title, 'Item with &, <, >, " entities');
-      expect(
-          feed.items![0].description, 'Text with &quot;quoted&quot; content');
+      expect(feed.items![0].description, 'Text with "quoted" content');
 
       // Content should preserve the CDATA content
       expect(feed.items![0].content, isNotNull);

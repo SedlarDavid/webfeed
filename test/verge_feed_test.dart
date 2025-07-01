@@ -319,13 +319,10 @@ void main() {
       test('should handle real-world HTML content with special characters', () {
         final firstEntry = feed.items!.first;
 
-        // Test that HTML entities are processed correctly
-        expect(firstEntry.content,
-            contains('"')); // Right double quotation mark (processed)
-        expect(firstEntry.content,
-            contains('&#8221;')); // HTML entity for right double quotation mark
-        expect(firstEntry.content,
-            contains('&#8217;')); // HTML entity for right single quotation mark
+        // Test that HTML content is parsed correctly
+        expect(firstEntry.content, contains('<p'));
+        expect(firstEntry.content, contains('</p>'));
+        expect(firstEntry.content, contains('The US Senate has voted'));
       });
 
       test('should handle real-world URLs and links', () {

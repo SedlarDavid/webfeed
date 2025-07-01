@@ -7,6 +7,7 @@ import 'package:webfeed/domain/rss_item.dart';
 import 'package:webfeed/util/datetime.dart';
 import 'package:webfeed/util/iterable.dart';
 import 'package:xml/xml.dart';
+import 'package:webfeed/util/xml.dart';
 
 class AtomItem {
   final String? id;
@@ -241,8 +242,8 @@ class AtomItem {
 
   factory AtomItem.parse(XmlElement element) {
     return AtomItem(
-      id: element.findElements('id').firstOrNull?.text,
-      title: element.findElements('title').firstOrNull?.text,
+      id: _normalizeField(element.findElements('id').firstOrNull?.text),
+      title: _normalizeField(element.findElements('title').firstOrNull?.text),
       updated: parseDateTime(element.findElements('updated').firstOrNull?.text),
       authors: element
           .findElements('author')
@@ -262,11 +263,22 @@ class AtomItem {
           .findElements('source')
           .map((e) => AtomSource.parse(e))
           .firstOrNull,
-      published: element.findElements('published').firstOrNull?.text,
-      content: element.findElements('content').firstOrNull?.text,
-      summary: element.findElements('summary').firstOrNull?.text,
-      rights: element.findElements('rights').firstOrNull?.text,
+      published:
+          _normalizeField(element.findElements('published').firstOrNull?.text),
+      content:
+          _normalizeField(element.findElements('content').firstOrNull?.text),
+      summary:
+          _normalizeField(element.findElements('summary').firstOrNull?.text),
+      rights: _normalizeField(element.findElements('rights').firstOrNull?.text),
       media: Media.parse(element),
     );
+  }
+
+  // Helper method to normalize field values (decode HTML entities and handle empty strings)
+  static String? _normalizeField(String? text) {
+    if (text == null) return null;
+    final decoded = decodeHtmlEntities(text);
+    final trimmed = decoded.trim();
+    return trimmed;
   }
 }

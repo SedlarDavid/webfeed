@@ -107,10 +107,17 @@ class RssItem {
           });
 
           final bestContent = mediaContents.first;
+          var width = bestContent.width;
+          var height = bestContent.height;
+          if (width == null || height == null) {
+            final dims = _extractDimensionsFromUrl(bestContent.url!);
+            width ??= dims?.$1;
+            height ??= dims?.$2;
+          }
           return FeedImage(
             url: bestContent.url!,
-            width: bestContent.width,
-            height: bestContent.height,
+            width: width,
+            height: height,
             type: bestContent.type,
             source: 'media:group/media:content',
           );
@@ -135,10 +142,17 @@ class RssItem {
           });
 
           final bestContent = mediaContents.first;
+          var width = bestContent.width;
+          var height = bestContent.height;
+          if (width == null || height == null) {
+            final dims = _extractDimensionsFromUrl(bestContent.url!);
+            width ??= dims?.$1;
+            height ??= dims?.$2;
+          }
           return FeedImage(
             url: bestContent.url!,
-            width: bestContent.width,
-            height: bestContent.height,
+            width: width,
+            height: height,
             type: bestContent.type,
             source: 'media:content',
           );
@@ -165,10 +179,17 @@ class RssItem {
           });
 
           final bestThumbnail = thumbnails.first;
+          var width = int.tryParse(bestThumbnail.width ?? '');
+          var height = int.tryParse(bestThumbnail.height ?? '');
+          if (width == null || height == null) {
+            final dims = _extractDimensionsFromUrl(bestThumbnail.url!);
+            width ??= dims?.$1;
+            height ??= dims?.$2;
+          }
           return FeedImage(
             url: bestThumbnail.url!,
-            width: int.tryParse(bestThumbnail.width ?? ''),
-            height: int.tryParse(bestThumbnail.height ?? ''),
+            width: width,
+            height: height,
             source: 'media:thumbnail',
           );
         }
@@ -234,9 +255,11 @@ class RssItem {
   /// Returns a record with (width, height) if found, null otherwise
   static (int, int)? _extractDimensionsFromUrl(String url) {
     try {
+      // Decode HTML entities in the URL (e.g., &amp;)
+      final decodedUrl = decodeHtmlEntities(url);
       // Pattern 1: filename_WIDTHxHEIGHT.ext (e.g., image_300x200.jpg)
       final dimensionPattern1 = RegExp(r'_(\d+)x(\d+)\.');
-      final match1 = dimensionPattern1.firstMatch(url);
+      final match1 = dimensionPattern1.firstMatch(decodedUrl);
       if (match1 != null) {
         final width = int.tryParse(match1.group(1)!);
         final height = int.tryParse(match1.group(2)!);
@@ -247,7 +270,7 @@ class RssItem {
 
       // Pattern 2: filename-width-W-height-H.ext (e.g., image-width-300-height-200.jpg)
       final dimensionPattern2 = RegExp(r'-width-(\d+)-height-(\d+)\.');
-      final match2 = dimensionPattern2.firstMatch(url);
+      final match2 = dimensionPattern2.firstMatch(decodedUrl);
       if (match2 != null) {
         final width = int.tryParse(match2.group(1)!);
         final height = int.tryParse(match2.group(2)!);
@@ -258,7 +281,7 @@ class RssItem {
 
       // Pattern 3: filename_wW_hH.ext (e.g., image_w300_h200.jpg)
       final dimensionPattern3 = RegExp(r'_w(\d+)_h(\d+)\.');
-      final match3 = dimensionPattern3.firstMatch(url);
+      final match3 = dimensionPattern3.firstMatch(decodedUrl);
       if (match3 != null) {
         final width = int.tryParse(match3.group(1)!);
         final height = int.tryParse(match3.group(2)!);
@@ -268,7 +291,7 @@ class RssItem {
       }
 
       // Pattern 4: query parameters (e.g., image.jpg?w=300&h=200 or image.jpg?width=300&height=200)
-      final uri = Uri.tryParse(url);
+      final uri = Uri.tryParse(decodedUrl);
       if (uri != null) {
         final widthParam =
             uri.queryParameters['w'] ?? uri.queryParameters['width'];
@@ -293,35 +316,22 @@ class RssItem {
   factory RssItem.parse(XmlElement element) {
     try {
       return RssItem(
-        title: _getTextContent(element, 'title'),
-        description: _getTextContent(element, 'description'),
-        link: _getTextContent(element, 'link'),
-
+        title: _normalizeField(_getTextContent(element, 'title')),
+        description: _normalizeField(_getTextContent(element, 'description')),
+        link: _normalizeField(_getTextContent(element, 'link')),
         categories: findAllElementsWithNamespace(element, 'category')
             .map((e) => RssCategory.parse(e))
             .toList(),
-
-        guid: _getTextContent(element, 'guid'),
-
-        // Try multiple date fields with different names
+        guid: _normalizeField(_getTextContent(element, 'guid')),
         pubDate: _parsePublishedDate(element),
-
-        // Try multiple author fields with different names
-        author: _getTextContent(element, 'author') ??
+        author: _normalizeField(_getTextContent(element, 'author') ??
             _getTextContent(element, 'creator') ??
-            _getTextContent(element, 'dc:creator'),
-
-        comments: _getTextContent(element, 'comments'),
-
+            _getTextContent(element, 'dc:creator')),
+        comments: _normalizeField(_getTextContent(element, 'comments')),
         source: _parseSource(element),
-
-        // Parse content with fallbacks for different formats
         content: _parseContent(element),
-
         media: Media.parse(element),
-
         enclosure: _parseEnclosure(element),
-
         dc: DublinCore.parse(element),
         itunes: Itunes.parse(element),
       );
@@ -336,12 +346,16 @@ class RssItem {
 
   // Helper method to get text content with namespace support
   static String? _getTextContent(XmlElement element, String tagName) {
-    final foundElement = findElementWithNamespace(element, tagName);
-    return foundElement != null
-        ? (foundElement.value?.trim() ??
-            foundElement.text.trim() ??
-            foundElement.innerText.trim())
-        : null;
+    final foundElement = findDirectElementWithNamespace(element, tagName);
+    return extractTextContent(foundElement);
+  }
+
+  // Helper method to normalize field values (decode HTML entities and handle empty strings)
+  static String? _normalizeField(String? text) {
+    if (text == null) return null;
+    final decoded = decodeHtmlEntities(text);
+    final trimmed = decoded.trim();
+    return trimmed;
   }
 
   // Parse published date with fallbacks for different date field names

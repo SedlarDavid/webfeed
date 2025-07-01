@@ -200,50 +200,52 @@ class RssFeed {
       var itemContainer = rdf ?? channelElement;
 
       // Parse the feed
+      final items = withArticles
+          ? itemContainer
+              .findElements('item')
+              .map((e) => RssItem.parse(e))
+              .toList()
+          : null;
+      if (items != null) {
+        for (var i = 0; i < items.length; i++) {}
+      }
       return RssFeed(
-        title: _getTextContent(channelElement, 'title'),
-        author: _getTextContent(channelElement, 'author') ??
-            _getTextContent(channelElement, 'creator'),
-        description: _getTextContent(channelElement, 'description'),
-        link: _getTextContent(channelElement, 'link'),
-
-        // Look for atom:link with type application/rss+xml and rel=self
-        atomLink: _findAtomLink(channelElement),
-
-        items: withArticles
-            ? itemContainer
-                .findAllElements('item')
-                .map((e) => RssItem.parse(e))
-                .toList()
-            : null,
-
+        title: _normalizeField(_getTextContent(channelElement, 'title')),
+        author: _normalizeField(_getTextContent(channelElement, 'author') ??
+            _getTextContent(channelElement, 'creator')),
+        description:
+            _normalizeField(_getTextContent(channelElement, 'description')),
+        link: _normalizeField(_getTextContent(channelElement, 'link')),
+        atomLink: _normalizeField(_findAtomLink(channelElement)),
+        items: items,
         image: _parseImage(rdf, channelElement),
-
         cloud: channelElement
             .findElements('cloud')
             .map((e) => RssCloud.parse(e))
             .firstOrNull,
-
         categories: findAllElementsWithNamespace(channelElement, 'category')
             .map((e) => RssCategory.parse(e))
             .toList(),
-
         skipDays: _parseSkipDays(channelElement),
-
         skipHours: _parseSkipHours(channelElement),
-
-        lastBuildDate: _getTextContent(channelElement, 'lastBuildDate'),
-        language: _getTextContent(channelElement, 'language'),
-        generator: _getTextContent(channelElement, 'generator'),
-        copyright: _getTextContent(channelElement, 'copyright') ??
-            _getTextContent(channelElement, 'rights'),
-        docs: _getTextContent(channelElement, 'docs'),
-        managingEditor: _getTextContent(channelElement, 'managingEditor'),
-        rating: _getTextContent(channelElement, 'rating'),
-        webMaster: _getTextContent(channelElement, 'webMaster'),
-        ttl: int.tryParse(_getTextContent(channelElement, 'ttl') ?? '') ?? 0,
-
-        // Parse additional namespaces
+        lastBuildDate:
+            _normalizeField(_getTextContent(channelElement, 'lastBuildDate')),
+        language: _normalizeField(_getTextContent(channelElement, 'language')),
+        generator:
+            _normalizeField(_getTextContent(channelElement, 'generator')),
+        copyright: _normalizeField(
+            _getTextContent(channelElement, 'copyright') ??
+                _getTextContent(channelElement, 'rights')),
+        docs: _normalizeField(_getTextContent(channelElement, 'docs')),
+        managingEditor:
+            _normalizeField(_getTextContent(channelElement, 'managingEditor')),
+        rating: _normalizeField(_getTextContent(channelElement, 'rating')),
+        webMaster:
+            _normalizeField(_getTextContent(channelElement, 'webMaster')),
+        ttl: int.tryParse(
+                _normalizeField(_getTextContent(channelElement, 'ttl')) ??
+                    '0') ??
+            0,
         dc: DublinCore.parse(channelElement),
         itunes: Itunes.parse(channelElement),
         syndication: Syndication.parse(channelElement),
@@ -256,12 +258,17 @@ class RssFeed {
 
   // Helper to get text content with namespace support
   static String? _getTextContent(XmlElement element, String tagName) {
-    final foundElement = findElementWithNamespace(element, tagName);
-    return foundElement != null
-        ? (foundElement.value?.trim() ??
-            foundElement.text.trim() ??
-            foundElement.innerText.trim())
-        : null;
+    final foundElement = findDirectElementWithNamespace(element, tagName);
+    return extractTextContent(foundElement);
+  }
+
+  // Helper method to normalize field values (decode HTML entities and handle empty strings)
+  static String? _normalizeField(String? text) {
+    if (text == null) return null;
+    final decoded = decodeHtmlEntities(text);
+    final trimmed = decoded.trim();
+    // Return empty string for empty content (consistent with CDATA handling)
+    return trimmed;
   }
 
   // Parse atom:link with improved namespace handling
@@ -293,7 +300,7 @@ class RssFeed {
       if (skipDaysElement == null) return [];
 
       return findAllElementsWithNamespace(skipDaysElement, 'day')
-          .map((e) => e.value?.trim() ?? e.text.trim() ?? e.innerText.trim())
+          .map((e) => e.value?.trim() ?? e.innerText.trim())
           .where((text) => text.isNotEmpty)
           .toList();
     } catch (e) {
@@ -309,10 +316,7 @@ class RssFeed {
       if (skipHoursElement == null) return [];
 
       return findAllElementsWithNamespace(skipHoursElement, 'hour')
-          .map((e) =>
-              int.tryParse(
-                  e.value?.trim() ?? e.text.trim() ?? e.innerText.trim()) ??
-              -1)
+          .map((e) => int.tryParse(e.value?.trim() ?? e.innerText.trim()) ?? -1)
           .where((hour) => hour >= 0 && hour <= 23)
           .toList();
     } catch (e) {
@@ -344,26 +348,58 @@ class RssFeed {
   static RssFeed parseEfficiently(String xmlString,
       {bool withArticles = true}) {
     try {
-      // Extract basic metadata using regex for speed
-      final titleMatch = RegExp(r'<title[^>]*>(.*?)</title>', dotAll: true)
-          .firstMatch(xmlString);
+      // Extract basic metadata using regex for speed with CDATA support
+      // Look for title specifically within channel element to avoid matching item titles
+      final channelMatch =
+          RegExp(r'<channel[^>]*>(.*?)</channel>', dotAll: true)
+              .firstMatch(xmlString);
+      final titleMatch = channelMatch != null
+          ? RegExp(r'<title[^>]*>(.*?)</title>', dotAll: true)
+              .firstMatch(channelMatch.group(1)!.split(RegExp(r'<item[ >]'))[0])
+          : null;
+      final channelContent = channelMatch?.group(1) ?? '';
       final descriptionMatch =
           RegExp(r'<description[^>]*>(.*?)</description>', dotAll: true)
-              .firstMatch(xmlString);
+              .firstMatch(channelContent);
       final linkMatch = RegExp(r'<link[^>]*>(.*?)</link>', dotAll: true)
-          .firstMatch(xmlString);
+          .firstMatch(channelContent);
       final languageMatch =
           RegExp(r'<language[^>]*>(.*?)</language>', dotAll: true)
-              .firstMatch(xmlString);
+              .firstMatch(channelContent);
       final generatorMatch =
           RegExp(r'<generator[^>]*>(.*?)</generator>', dotAll: true)
-              .firstMatch(xmlString);
+              .firstMatch(channelContent);
       final copyrightMatch =
           RegExp(r'<copyright[^>]*>(.*?)</copyright>', dotAll: true)
-              .firstMatch(xmlString);
+              .firstMatch(channelContent);
       final lastBuildDateMatch =
           RegExp(r'<lastBuildDate[^>]*>(.*?)</lastBuildDate>', dotAll: true)
-              .firstMatch(xmlString);
+              .firstMatch(channelContent);
+      final authorMatch = RegExp(r'<author[^>]*>(.*?)</author>', dotAll: true)
+          .firstMatch(channelContent);
+      final managingEditorMatch =
+          RegExp(r'<managingEditor[^>]*>(.*?)</managingEditor>', dotAll: true)
+              .firstMatch(channelContent);
+      final ratingMatch = RegExp(r'<rating[^>]*>(.*?)</rating>', dotAll: true)
+          .firstMatch(channelContent);
+      final webMasterMatch =
+          RegExp(r'<webMaster[^>]*>(.*?)</webMaster>', dotAll: true)
+              .firstMatch(channelContent);
+      final docsMatch = RegExp(r'<docs[^>]*>(.*?)</docs>', dotAll: true)
+          .firstMatch(channelContent);
+      final ttlMatch = RegExp(r'<ttl[^>]*>(.*?)</ttl>', dotAll: true)
+          .firstMatch(channelContent);
+
+      // Parse complex elements efficiently
+      final image = _parseImageEfficiently(xmlString);
+      final cloud = _parseCloudEfficiently(xmlString);
+      final categories = _parseCategoriesEfficiently(xmlString);
+      final skipDays = _parseSkipDaysEfficiently(xmlString);
+      final skipHours = _parseSkipHoursEfficiently(xmlString);
+      final atomLink = _parseAtomLinkEfficiently(xmlString);
+      final dc = _parseDublinCoreEfficiently(xmlString);
+      final itunes = _parseItunesEfficiently(xmlString);
+      final syndication = _parseSyndicationEfficiently(xmlString);
 
       // Parse items efficiently if requested
       List<RssItem>? items;
@@ -371,32 +407,32 @@ class RssFeed {
         items = _parseItemsEfficiently(xmlString);
       }
 
+      if (items != null) {}
+
       return RssFeed(
-        title: _cleanText(titleMatch?.group(1)),
-        description: _cleanText(descriptionMatch?.group(1)),
-        link: _cleanText(linkMatch?.group(1)),
-        language: _cleanText(languageMatch?.group(1)),
-        generator: _cleanText(generatorMatch?.group(1)),
-        copyright: _cleanText(copyrightMatch?.group(1)),
-        lastBuildDate: _cleanText(lastBuildDateMatch?.group(1)),
+        title: _decodeOrCdata(titleMatch?.group(1)),
+        description: _decodeOrCdata(descriptionMatch?.group(1)),
+        link: _decodeOrCdata(linkMatch?.group(1)),
+        language: _decodeOrCdata(languageMatch?.group(1)),
+        generator: _decodeOrCdata(generatorMatch?.group(1)),
+        copyright: _decodeOrCdata(copyrightMatch?.group(1)),
+        lastBuildDate: _decodeOrCdata(lastBuildDateMatch?.group(1)),
+        author: _decodeOrCdata(authorMatch?.group(1)),
+        managingEditor: _decodeOrCdata(managingEditorMatch?.group(1)),
+        rating: _decodeOrCdata(ratingMatch?.group(1)),
+        webMaster: _decodeOrCdata(webMasterMatch?.group(1)),
+        docs: _decodeOrCdata(docsMatch?.group(1)),
+        ttl: int.tryParse(_decodeOrCdata(ttlMatch?.group(1)) ?? '') ?? 0,
         items: items,
-        // Note: Image, cloud, categories, skipDays, skipHours, and other fields
-        // would need more complex parsing and are set to null for efficiency
-        image: null,
-        cloud: null,
-        categories: null,
-        skipDays: null,
-        skipHours: null,
-        author: null,
-        managingEditor: null,
-        rating: null,
-        webMaster: null,
-        atomLink: null,
-        ttl: null,
-        docs: null,
-        dc: null,
-        itunes: null,
-        syndication: null,
+        image: image,
+        cloud: cloud,
+        categories: categories,
+        skipDays: skipDays,
+        skipHours: skipHours,
+        atomLink: atomLink,
+        dc: dc,
+        itunes: itunes,
+        syndication: syndication,
       );
     } catch (e) {
       throw ArgumentError(
@@ -407,7 +443,8 @@ class RssFeed {
   /// Parse items using regex for better performance
   static List<RssItem> _parseItemsEfficiently(String xmlString) {
     final items = <RssItem>[];
-    final itemPattern = RegExp(r'<item[^>]*>(.*?)</item>', dotAll: true);
+    final itemPattern =
+        RegExp(r'<item(?![^<]*<!\[CDATA\[)[^>]*>(.*?)</item>', dotAll: true);
 
     for (final match in itemPattern.allMatches(xmlString)) {
       final itemXml = match.group(0)!;
@@ -439,14 +476,12 @@ class RssFeed {
           .firstMatch(itemXml);
 
       return RssItem(
-        title: _cleanText(titleMatch?.group(1)),
-        description: _cleanText(descriptionMatch?.group(1)),
-        link: _cleanText(linkMatch?.group(1)),
-        guid: _cleanText(guidMatch?.group(1)),
-        pubDate: parseDateTime(_cleanText(pubDateMatch?.group(1))),
-        author: _cleanText(authorMatch?.group(1)),
-        // Note: Categories, comments, source, content, media, enclosure, and other fields
-        // would need more complex parsing and are set to null for efficiency
+        title: _decodeOrCdata(titleMatch?.group(1)),
+        description: _decodeOrCdata(descriptionMatch?.group(1)),
+        link: _decodeOrCdata(linkMatch?.group(1)),
+        guid: _decodeOrCdata(guidMatch?.group(1)),
+        pubDate: parseDateTime(_decodeOrCdata(pubDateMatch?.group(1))),
+        author: _decodeOrCdata(authorMatch?.group(1)),
         categories: null,
         comments: null,
         source: null,
@@ -461,9 +496,283 @@ class RssFeed {
     }
   }
 
-  /// Clean text content
-  static String? _cleanText(String? text) {
+  static String? _decodeOrCdata(String? text) {
     if (text == null) return null;
-    return text.trim().replaceAll(RegExp(r'\s+'), ' ');
+    final result = stripCdataWithFlag(text);
+    final decoded = decodeHtmlEntities(result.value);
+    final trimmed = decoded.trim();
+    // For CDATA sections, return empty string if empty, not null
+    if (result.isCdata) {
+      return trimmed;
+    }
+    // For regular text, return null if empty
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  /// Parse image efficiently using regex
+  static RssImage? _parseImageEfficiently(String xmlString) {
+    try {
+      final imageMatch = RegExp(r'<image[^>]*>(.*?)</image>', dotAll: true)
+          .firstMatch(xmlString);
+      if (imageMatch == null) return null;
+
+      final imageXml = imageMatch.group(0)!;
+      final urlMatch =
+          RegExp(r'<url[^>]*>(.*?)</url>', dotAll: true).firstMatch(imageXml);
+      final titleMatch = RegExp(r'<title[^>]*>(.*?)</title>', dotAll: true)
+          .firstMatch(imageXml);
+      final linkMatch =
+          RegExp(r'<link[^>]*>(.*?)</link>', dotAll: true).firstMatch(imageXml);
+      final widthMatch = RegExp(r'<width[^>]*>(.*?)</width>', dotAll: true)
+          .firstMatch(imageXml);
+      final heightMatch = RegExp(r'<height[^>]*>(.*?)</height>', dotAll: true)
+          .firstMatch(imageXml);
+
+      return RssImage(
+        url: _decodeOrCdata(urlMatch?.group(1)),
+        title: _decodeOrCdata(titleMatch?.group(1)),
+        link: _decodeOrCdata(linkMatch?.group(1)),
+        width: int.tryParse(_decodeOrCdata(widthMatch?.group(1)) ?? '') ?? 0,
+        height: int.tryParse(_decodeOrCdata(heightMatch?.group(1)) ?? '') ?? 0,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Parse cloud efficiently using regex
+  static RssCloud? _parseCloudEfficiently(String xmlString) {
+    try {
+      final cloudMatch = RegExp(r'<cloud[^>]*>(.*?)</cloud>', dotAll: true)
+          .firstMatch(xmlString);
+      if (cloudMatch == null) return null;
+
+      final cloudXml = cloudMatch.group(0)!;
+      final domainMatch = RegExp(r'domain="([^"]*)"').firstMatch(cloudXml);
+      final portMatch = RegExp(r'port="([^"]*)"').firstMatch(cloudXml);
+      final pathMatch = RegExp(r'path="([^"]*)"').firstMatch(cloudXml);
+      final registerProcedureMatch =
+          RegExp(r'registerProcedure="([^"]*)"').firstMatch(cloudXml);
+      final protocolMatch = RegExp(r'protocol="([^"]*)"').firstMatch(cloudXml);
+
+      return RssCloud(
+        domainMatch?.group(1),
+        portMatch?.group(1),
+        pathMatch?.group(1),
+        registerProcedureMatch?.group(1),
+        protocolMatch?.group(1),
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Parse categories efficiently using regex
+  static List<RssCategory> _parseCategoriesEfficiently(String xmlString) {
+    final categories = <RssCategory>[];
+    final categoryPattern =
+        RegExp(r'<category[^>]*>(.*?)</category>', dotAll: true);
+
+    for (final match in categoryPattern.allMatches(xmlString)) {
+      final categoryXml = match.group(0)!;
+      final category = _parseCategoryEfficiently(categoryXml);
+      if (category != null) {
+        categories.add(category);
+      }
+    }
+
+    return categories;
+  }
+
+  /// Parse a single category efficiently
+  static RssCategory? _parseCategoryEfficiently(String categoryXml) {
+    try {
+      final domainMatch = RegExp(r'domain="([^"]*)"').firstMatch(categoryXml);
+      final contentMatch =
+          RegExp(r'<category[^>]*>(.*?)</category>', dotAll: true)
+              .firstMatch(categoryXml);
+      final content = _decodeOrCdata(contentMatch?.group(1));
+
+      return RssCategory(
+        domainMatch?.group(1),
+        content ?? '',
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Parse skipDays efficiently using regex
+  static List<String> _parseSkipDaysEfficiently(String xmlString) {
+    try {
+      final skipDaysMatch =
+          RegExp(r'<skipDays[^>]*>(.*?)</skipDays>', dotAll: true)
+              .firstMatch(xmlString);
+      if (skipDaysMatch == null) return [];
+
+      final skipDaysXml = skipDaysMatch.group(0)!;
+      final dayPattern = RegExp(r'<day[^>]*>(.*?)</day>', dotAll: true);
+      final days = <String>[];
+
+      for (final match in dayPattern.allMatches(skipDaysXml)) {
+        final day = _decodeOrCdata(match.group(1));
+        if (day != null && day.isNotEmpty) {
+          days.add(day);
+        }
+      }
+
+      return days;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Parse skipHours efficiently using regex
+  static List<int> _parseSkipHoursEfficiently(String xmlString) {
+    try {
+      final skipHoursMatch =
+          RegExp(r'<skipHours[^>]*>(.*?)</skipHours>', dotAll: true)
+              .firstMatch(xmlString);
+      if (skipHoursMatch == null) return [];
+
+      final skipHoursXml = skipHoursMatch.group(0)!;
+      final hourPattern = RegExp(r'<hour[^>]*>(.*?)</hour>', dotAll: true);
+      final hours = <int>[];
+
+      for (final match in hourPattern.allMatches(skipHoursXml)) {
+        final hour = int.tryParse(_decodeOrCdata(match.group(1)) ?? '') ?? -1;
+        if (hour >= 0 && hour <= 23) {
+          hours.add(hour);
+        }
+      }
+
+      return hours;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Parse atom link efficiently using regex
+  static String? _parseAtomLinkEfficiently(String xmlString) {
+    try {
+      final atomLinkPattern = RegExp(r'<atom:link[^>]*>', dotAll: true);
+      final matches = atomLinkPattern.allMatches(xmlString);
+
+      for (final match in matches) {
+        final linkXml = match.group(0)!;
+        final relMatch = RegExp(r'rel="([^"]*)"').firstMatch(linkXml);
+        final hrefMatch = RegExp(r'href="([^"]*)"').firstMatch(linkXml);
+
+        if (relMatch?.group(1) == 'self' && hrefMatch != null) {
+          return hrefMatch.group(1);
+        }
+      }
+
+      // Fallback to any atom:link
+      final firstAtomLink = atomLinkPattern.firstMatch(xmlString);
+      if (firstAtomLink != null) {
+        final linkXml = firstAtomLink.group(0)!;
+        final hrefMatch = RegExp(r'href="([^"]*)"').firstMatch(linkXml);
+        return hrefMatch?.group(1);
+      }
+
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Parse Dublin Core efficiently using regex
+  static DublinCore? _parseDublinCoreEfficiently(String xmlString) {
+    try {
+      // This is a simplified version - in practice, you'd want to parse all DC fields
+      final creatorMatch =
+          RegExp(r'<dc:creator[^>]*>(.*?)</dc:creator>', dotAll: true)
+              .firstMatch(xmlString);
+      final dateMatch = RegExp(r'<dc:date[^>]*>(.*?)</dc:date>', dotAll: true)
+          .firstMatch(xmlString);
+
+      if (creatorMatch == null && dateMatch == null) return null;
+
+      return DublinCore(
+        creator: _decodeOrCdata(creatorMatch?.group(1)),
+        date: parseDateTime(_decodeOrCdata(dateMatch?.group(1))),
+        // Add other DC fields as needed
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Parse iTunes efficiently using regex
+  static Itunes? _parseItunesEfficiently(String xmlString) {
+    try {
+      // This is a simplified version - in practice, you'd want to parse all iTunes fields
+      final authorMatch =
+          RegExp(r'<itunes:author[^>]*>(.*?)</itunes:author>', dotAll: true)
+              .firstMatch(xmlString);
+      final summaryMatch =
+          RegExp(r'<itunes:summary[^>]*>(.*?)</itunes:summary>', dotAll: true)
+              .firstMatch(xmlString);
+
+      if (authorMatch == null && summaryMatch == null) return null;
+
+      return Itunes(
+        author: _decodeOrCdata(authorMatch?.group(1)),
+        summary: _decodeOrCdata(summaryMatch?.group(1)),
+        // Add other iTunes fields as needed
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Parse Syndication efficiently using regex
+  static Syndication? _parseSyndicationEfficiently(String xmlString) {
+    try {
+      // This is a simplified version - in practice, you'd want to parse all Syndication fields
+      final updatePeriodMatch =
+          RegExp(r'<sy:updatePeriod[^>]*>(.*?)</sy:updatePeriod>', dotAll: true)
+              .firstMatch(xmlString);
+      final updateFrequencyMatch = RegExp(
+              r'<sy:updateFrequency[^>]*>(.*?)</sy:updateFrequency>',
+              dotAll: true)
+          .firstMatch(xmlString);
+
+      if (updatePeriodMatch == null && updateFrequencyMatch == null)
+        return null;
+
+      SyndicationUpdatePeriod updatePeriod;
+      switch (_decodeOrCdata(updatePeriodMatch?.group(1))) {
+        case 'hourly':
+          updatePeriod = SyndicationUpdatePeriod.hourly;
+          break;
+        case 'daily':
+          updatePeriod = SyndicationUpdatePeriod.daily;
+          break;
+        case 'weekly':
+          updatePeriod = SyndicationUpdatePeriod.weekly;
+          break;
+        case 'monthly':
+          updatePeriod = SyndicationUpdatePeriod.monthly;
+          break;
+        case 'yearly':
+          updatePeriod = SyndicationUpdatePeriod.yearly;
+          break;
+        default:
+          updatePeriod = SyndicationUpdatePeriod.daily;
+          break;
+      }
+
+      return Syndication(
+        updatePeriod: updatePeriod,
+        updateFrequency: int.tryParse(
+                _decodeOrCdata(updateFrequencyMatch?.group(1)) ?? '') ??
+            0,
+        // Add other Syndication fields as needed
+      );
+    } catch (e) {
+      return null;
+    }
   }
 }

@@ -127,7 +127,7 @@ void main() {
       expect(itemElement.getElement('itunes:explicit'), isNotNull);
 
       // Test non-boolean value
-      expect(findElementWithNamespace(itemElement, 'nonBoolean')?.value,
+      expect(findElementWithNamespace(itemElement, 'nonBoolean')?.text,
           'something');
 
       // Test missing element

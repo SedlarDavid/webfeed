@@ -6,6 +6,12 @@ import 'package:webfeed/domain/atom_person.dart';
 import 'package:webfeed/domain/rss_item.dart';
 import 'package:webfeed/util/datetime.dart';
 import 'package:webfeed/util/iterable.dart';
+import 'package:webfeed/util/xml.dart'
+    show
+        stripCdata,
+        getTextContentWithNamespace,
+        stripCdataWithFlag,
+        decodeHtmlEntities;
 import 'package:xml/xml.dart';
 
 class AtomFeed {
@@ -152,26 +158,14 @@ class AtomFeed {
       throw ArgumentError('feed not found');
     }
 
+    final entryElements = feedElement.findElements('entry').toList();
+    final parsedItems = entryElements.map((e) => AtomItem.parse(e)).toList();
     return AtomFeed(
-      id: feedElement.findElements('id').firstOrNull?.value?.trim() ??
-          feedElement.findElements('id').firstOrNull?.text.trim() ??
-          feedElement.findElements('id').firstOrNull?.innerText.trim(),
-      title: feedElement.findElements('title').firstOrNull?.value?.trim() ??
-          feedElement.findElements('title').firstOrNull?.text.trim() ??
-          feedElement.findElements('title').firstOrNull?.innerText.trim(),
-      updated: parseDateTime(feedElement
-              .findElements('updated')
-              .firstOrNull
-              ?.value
-              ?.trim() ??
-          feedElement.findElements('updated').firstOrNull?.text.trim() ??
-          feedElement.findElements('updated').firstOrNull?.innerText.trim()),
-      items: withArticles
-          ? feedElement
-              .findElements('entry')
-              .map((e) => AtomItem.parse(e))
-              .toList()
-          : null,
+      id: _normalizeField(getTextContentWithNamespace(feedElement, 'id')),
+      title: _normalizeField(getTextContentWithNamespace(feedElement, 'title')),
+      updated:
+          parseDateTime(getTextContentWithNamespace(feedElement, 'updated')),
+      items: withArticles ? parsedItems : null,
       links: feedElement
           .findElements('link')
           .map((e) => AtomLink.parse(e))
@@ -192,23 +186,22 @@ class AtomFeed {
           .findElements('generator')
           .map((e) => AtomGenerator.parse(e))
           .firstOrNull,
-      icon: feedElement.findElements('icon').firstOrNull?.value?.trim() ??
-          feedElement.findElements('icon').firstOrNull?.text.trim() ??
-          feedElement.findElements('icon').firstOrNull?.innerText.trim(),
-      logo: feedElement.findElements('logo').firstOrNull?.value?.trim() ??
-          feedElement.findElements('logo').firstOrNull?.text.trim() ??
-          feedElement.findElements('logo').firstOrNull?.innerText.trim(),
-      rights: feedElement.findElements('rights').firstOrNull?.value?.trim() ??
-          feedElement.findElements('rights').firstOrNull?.text.trim() ??
-          feedElement.findElements('rights').firstOrNull?.innerText.trim(),
-      subtitle: feedElement
-              .findElements('subtitle')
-              .firstOrNull
-              ?.value
-              ?.trim() ??
-          feedElement.findElements('subtitle').firstOrNull?.text.trim() ??
-          feedElement.findElements('subtitle').firstOrNull?.innerText.trim(),
+      icon: _normalizeField(getTextContentWithNamespace(feedElement, 'icon')),
+      logo: _normalizeField(getTextContentWithNamespace(feedElement, 'logo')),
+      rights:
+          _normalizeField(getTextContentWithNamespace(feedElement, 'rights')),
+      subtitle:
+          _normalizeField(getTextContentWithNamespace(feedElement, 'subtitle')),
     );
+  }
+
+  // Helper method to normalize field values (decode HTML entities and handle empty strings)
+  static String? _normalizeField(String? text) {
+    if (text == null) return null;
+    final decoded = decodeHtmlEntities(text);
+    final trimmed = decoded.trim();
+    // Return empty string for empty content (consistent with CDATA handling)
+    return trimmed;
   }
 
   /// Efficient parsing method for large XML files
@@ -216,23 +209,35 @@ class AtomFeed {
   static AtomFeed parseEfficiently(String xmlString,
       {bool withArticles = true}) {
     try {
-      // Extract basic metadata using regex for speed
-      final titleMatch = RegExp(r'<title[^>]*>(.*?)</title>', dotAll: true)
+      // Extract basic metadata using regex for speed with CDATA support
+      // Look for feed-level elements specifically within feed element to avoid matching entry elements
+      final feedMatch = RegExp(r'<feed[^>]*>(.*?)</feed>', dotAll: true)
           .firstMatch(xmlString);
+      final feedContent = feedMatch?.group(1) ?? '';
+
+      final titleMatch = RegExp(r'<title[^>]*>(.*?)</title>', dotAll: true)
+          .firstMatch(feedContent);
       final idMatch =
-          RegExp(r'<id[^>]*>(.*?)</id>', dotAll: true).firstMatch(xmlString);
+          RegExp(r'<id[^>]*>(.*?)</id>', dotAll: true).firstMatch(feedContent);
       final updatedMatch =
           RegExp(r'<updated[^>]*>(.*?)</updated>', dotAll: true)
-              .firstMatch(xmlString);
+              .firstMatch(feedContent);
       final iconMatch = RegExp(r'<icon[^>]*>(.*?)</icon>', dotAll: true)
-          .firstMatch(xmlString);
+          .firstMatch(feedContent);
       final logoMatch = RegExp(r'<logo[^>]*>(.*?)</logo>', dotAll: true)
-          .firstMatch(xmlString);
+          .firstMatch(feedContent);
       final rightsMatch = RegExp(r'<rights[^>]*>(.*?)</rights>', dotAll: true)
-          .firstMatch(xmlString);
+          .firstMatch(feedContent);
       final subtitleMatch =
           RegExp(r'<subtitle[^>]*>(.*?)</subtitle>', dotAll: true)
-              .firstMatch(xmlString);
+              .firstMatch(feedContent);
+
+      // Parse complex elements efficiently
+      final links = _parseLinksEfficiently(xmlString);
+      final authors = _parseAuthorsEfficiently(xmlString);
+      final contributors = _parseContributorsEfficiently(xmlString);
+      final categories = _parseCategoriesEfficiently(xmlString);
+      final generator = _parseGeneratorEfficiently(xmlString);
 
       // Parse items efficiently if requested
       List<AtomItem>? items;
@@ -241,32 +246,31 @@ class AtomFeed {
       }
 
       return AtomFeed(
-        id: _cleanText(idMatch?.group(1)),
-        title: _cleanText(titleMatch?.group(1)),
-        updated: parseDateTime(_cleanText(updatedMatch?.group(1))),
+        id: _decodeOrCdata(idMatch?.group(1)),
+        title: _decodeOrCdata(titleMatch?.group(1)),
+        updated: parseDateTime(_decodeOrCdata(updatedMatch?.group(1))),
         items: items,
-        icon: _cleanText(iconMatch?.group(1)),
-        logo: _cleanText(logoMatch?.group(1)),
-        rights: _cleanText(rightsMatch?.group(1)),
-        subtitle: _cleanText(subtitleMatch?.group(1)),
-        // Note: Links, authors, contributors, categories, and generator
-        // would need more complex parsing and are set to null for efficiency
-        links: null,
-        authors: null,
-        contributors: null,
-        categories: null,
-        generator: null,
+        icon: _decodeOrCdata(iconMatch?.group(1)),
+        logo: _decodeOrCdata(logoMatch?.group(1)),
+        rights: _decodeOrCdata(rightsMatch?.group(1)),
+        subtitle: _decodeOrCdata(subtitleMatch?.group(1)),
+        links: links,
+        authors: authors,
+        contributors: contributors,
+        categories: categories,
+        generator: generator,
       );
     } catch (e) {
       throw ArgumentError(
-          'Failed to parse Atom feed efficiently: ${e.toString()}');
+          'Failed to parse Atom feed efficiently: \\${e.toString()}');
     }
   }
 
   /// Parse items using regex for better performance
   static List<AtomItem> _parseItemsEfficiently(String xmlString) {
     final items = <AtomItem>[];
-    final entryPattern = RegExp(r'<entry[^>]*>(.*?)</entry>', dotAll: true);
+    final entryPattern =
+        RegExp(r'<entry(?![^<]*<!\[CDATA\[)[^>]*>(.*?)</entry>', dotAll: true);
 
     for (final match in entryPattern.allMatches(xmlString)) {
       final entryXml = match.group(0)!;
@@ -297,13 +301,11 @@ class AtomFeed {
               .firstMatch(entryXml);
 
       return AtomItem(
-        title: _cleanText(titleMatch?.group(1)),
-        id: _cleanText(idMatch?.group(1)),
-        updated: parseDateTime(_cleanText(updatedMatch?.group(1))),
-        summary: _cleanText(summaryMatch?.group(1)),
-        content: _cleanText(contentMatch?.group(1)),
-        // Note: Links, authors, contributors, categories, and other fields
-        // would need more complex parsing and are set to null for efficiency
+        title: _decodeOrCdata(titleMatch?.group(1)),
+        id: _decodeOrCdata(idMatch?.group(1)),
+        updated: parseDateTime(_decodeOrCdata(updatedMatch?.group(1))),
+        summary: _decodeOrCdata(summaryMatch?.group(1)),
+        content: _decodeOrCdata(contentMatch?.group(1)),
         links: null,
         authors: null,
         contributors: null,
@@ -317,9 +319,163 @@ class AtomFeed {
     }
   }
 
-  /// Clean text content
-  static String? _cleanText(String? text) {
+  static String? _decodeOrCdata(String? text) {
     if (text == null) return null;
-    return text.trim().replaceAll(RegExp(r'\s+'), ' ');
+    final result = stripCdataWithFlag(text);
+    final decoded = decodeHtmlEntities(result.value);
+    final trimmed = decoded.trim();
+    // For CDATA sections, return empty string if empty, not null
+    if (result.isCdata) {
+      return trimmed;
+    }
+    // For regular text, return null if empty
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  /// Parse links efficiently using regex
+  static List<AtomLink> _parseLinksEfficiently(String xmlString) {
+    final links = <AtomLink>[];
+    final linkPattern = RegExp(r'<link[^>]*>(.*?)</link>', dotAll: true);
+
+    for (final match in linkPattern.allMatches(xmlString)) {
+      final linkXml = match.group(0)!;
+      final link = _parseLinkEfficiently(linkXml);
+      if (link != null) {
+        links.add(link);
+      }
+    }
+
+    return links;
+  }
+
+  /// Parse a single link efficiently
+  static AtomLink? _parseLinkEfficiently(String linkXml) {
+    try {
+      final hrefMatch = RegExp(r'href="([^"]*)"').firstMatch(linkXml);
+      final relMatch = RegExp(r'rel="([^"]*)"').firstMatch(linkXml);
+      final typeMatch = RegExp(r'type="([^"]*)"').firstMatch(linkXml);
+      final titleMatch = RegExp(r'title="([^"]*)"').firstMatch(linkXml);
+
+      return AtomLink(
+        hrefMatch?.group(1),
+        relMatch?.group(1),
+        typeMatch?.group(1),
+        null, // hreflang
+        titleMatch?.group(1),
+        0, // length
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Parse authors efficiently using regex
+  static List<AtomPerson> _parseAuthorsEfficiently(String xmlString) {
+    final authors = <AtomPerson>[];
+    final authorPattern = RegExp(r'<author[^>]*>(.*?)</author>', dotAll: true);
+
+    for (final match in authorPattern.allMatches(xmlString)) {
+      final authorXml = match.group(0)!;
+      final author = _parsePersonEfficiently(authorXml);
+      if (author != null) {
+        authors.add(author);
+      }
+    }
+
+    return authors;
+  }
+
+  /// Parse contributors efficiently using regex
+  static List<AtomPerson> _parseContributorsEfficiently(String xmlString) {
+    final contributors = <AtomPerson>[];
+    final contributorPattern =
+        RegExp(r'<contributor[^>]*>(.*?)</contributor>', dotAll: true);
+
+    for (final match in contributorPattern.allMatches(xmlString)) {
+      final contributorXml = match.group(0)!;
+      final contributor = _parsePersonEfficiently(contributorXml);
+      if (contributor != null) {
+        contributors.add(contributor);
+      }
+    }
+
+    return contributors;
+  }
+
+  /// Parse a single person efficiently
+  static AtomPerson? _parsePersonEfficiently(String personXml) {
+    try {
+      final nameMatch = RegExp(r'<name[^>]*>(.*?)</name>', dotAll: true)
+          .firstMatch(personXml);
+      final emailMatch = RegExp(r'<email[^>]*>(.*?)</email>', dotAll: true)
+          .firstMatch(personXml);
+      final uriMatch =
+          RegExp(r'<uri[^>]*>(.*?)</uri>', dotAll: true).firstMatch(personXml);
+
+      return AtomPerson(
+        name: _decodeOrCdata(nameMatch?.group(1)),
+        email: _decodeOrCdata(emailMatch?.group(1)),
+        uri: _decodeOrCdata(uriMatch?.group(1)),
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Parse categories efficiently using regex
+  static List<AtomCategory> _parseCategoriesEfficiently(String xmlString) {
+    final categories = <AtomCategory>[];
+    final categoryPattern =
+        RegExp(r'<category[^>]*>(.*?)</category>', dotAll: true);
+
+    for (final match in categoryPattern.allMatches(xmlString)) {
+      final categoryXml = match.group(0)!;
+      final category = _parseCategoryEfficiently(categoryXml);
+      if (category != null) {
+        categories.add(category);
+      }
+    }
+
+    return categories;
+  }
+
+  /// Parse a single category efficiently
+  static AtomCategory? _parseCategoryEfficiently(String categoryXml) {
+    try {
+      final termMatch = RegExp(r'term="([^"]*)"').firstMatch(categoryXml);
+      final schemeMatch = RegExp(r'scheme="([^"]*)"').firstMatch(categoryXml);
+      final labelMatch = RegExp(r'label="([^"]*)"').firstMatch(categoryXml);
+
+      return AtomCategory(
+        termMatch?.group(1),
+        schemeMatch?.group(1),
+        _decodeOrCdata(labelMatch?.group(1)),
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Parse generator efficiently using regex
+  static AtomGenerator? _parseGeneratorEfficiently(String xmlString) {
+    try {
+      final generatorMatch =
+          RegExp(r'<generator[^>]*>(.*?)</generator>', dotAll: true)
+              .firstMatch(xmlString);
+      if (generatorMatch == null) return null;
+
+      final generatorXml = generatorMatch.group(0)!;
+      final uriMatch = RegExp(r'uri="([^"]*)"').firstMatch(generatorXml);
+      final versionMatch =
+          RegExp(r'version="([^"]*)"').firstMatch(generatorXml);
+
+      return AtomGenerator(
+        uriMatch?.group(1),
+        versionMatch?.group(1),
+        _decodeOrCdata(generatorMatch.group(1)),
+      );
+    } catch (e) {
+      return null;
+    }
   }
 }

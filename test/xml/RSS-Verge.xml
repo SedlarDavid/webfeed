@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed
+    xmlns="http://www.w3.org/2005/Atom"
+    xmlns:thr="http://purl.org/syndication/thread/1.0"
+    xml:lang="en-US"
+>
+    <title type="text">The Verge</title>
+    <subtitle type="text">The Verge is about technology and how it makes us feel. Founded in 2011,
+        we offer our audience everything from breaking news to reviews to award-winning features and
+        investigations, on our site, in video, and in podcasts.</subtitle>
+
+    <updated>2025-07-01T13:15:48+00:00</updated>
+
+    <link rel="alternate" type="text/html" href="https://www.theverge.com" />
+    <id>https://www.theverge.com/rss/index.xml</id>
+    <link rel="self" type="application/atom+xml" href="https://www.theverge.com/rss/index.xml" />
+
+    <icon>
+        https://platform.theverge.com/wp-content/uploads/sites/2/2025/01/verge-rss-large_80b47e.png?w=150&amp;h=150&amp;crop=1</icon>
+    <entry>
+
+        <author>
+            <name>Tina Nguyen</name>
+        </author>
+
+        <title type="html"><![CDATA[Senate drops plan to ban state AI laws]]></title>
+        <link rel="alternate" type="text/html"
+            href="https://www.theverge.com/politics/695495/senate-drops-ai-moratorium-budget-bill" />
+        <id>https://www.theverge.com/?p=695495</id>
+        <updated>2025-07-01T09:15:48-04:00</updated>
+        <published>2025-07-01T09:15:48-04:00</published>
+        <category scheme="https://www.theverge.com" term="AI" />
+        <category scheme="https://www.theverge.com" term="News" />
+        <category scheme="https://www.theverge.com" term="Policy" />
+        <category scheme="https://www.theverge.com" term="Politics" />
+        <summary type="html"><![CDATA[The US Senate has voted overwhelmingly to remove a moratorium on states regulating AI systems from the Republican “big, beautiful bill.&#8221; Legislators agreed by a margin of 99 to 1 to drop the controversial proposal during a protracted fight over the omnibus budget bill, which is still under debate. The vote followed failed attempts to [&#8230;]]]></summary>
+
+        <content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="A group of people in suits walking down the hallway, including Senate Majority Leader John Thune." data-caption="" data-portal-copyright="Photo: Andrew Harnik / Getty Images" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/2025/06/gettyimages-2222154603.jpg?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+		</figcaption>
+</figure>
+<p class="has-text-align-none">The US Senate has voted overwhelmingly to remove a moratorium on states regulating AI systems from the Republican “big, beautiful bill.&#8221; Legislators <a href="https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00363.htm">agreed by a margin of 99 to 1</a> to drop the controversial proposal during a protracted fight over the omnibus budget bill, which is still under debate.</p>
+
+<p class="has-text-align-none">The vote followed failed attempts to revise the rule in a way that would placate holdouts, particularly Sen. Marsha Blackburn (R-TN), one of the moratorium’s first opponents. Over the weekend, Blackburn struck a deal with Sen. Ted Cruz (R-TX) that would have <a href="https://www.politico.com/live-updates/2025/06/29/congress/blackburn-cruz-find-potential-truce-on-state-ai-moratorium-child-safety-00432296">cut the moratorium to five years</a> and allowed states to continue enforcing AI laws that handled online child safety as well as individuals’ names, images, and likenesses. But after a day of furious backlash from the populist right, driven primarily by MAGA internet powerhouses Steve Bannon and Mike Davis, Blackburn relented at the last minute — and chose, instead, to attach her name to a Democrat-sponsored amendment that sought to remove the bill altogether.</p>
+
+<p class="has-text-align-none">“While I appreciate Chairman Cruz’s efforts to find acceptable language that allows states to protect their citizens from the abuses of AI, the current language is not acceptable to those who need those provisions the most,” she <a href="https://x.com/BenBrodyDC/status/1939838593062572194/photo/1">said</a> in a statement on Monday night. “This provision could allow Big Tech to continue to exploit kids, creators, and conservatives.”</p>
+
+<p class="has-text-align-none">Early fellow GOP defectors included Sen. Susan Collins (R-ME); Sen. Josh Hawley (R-MO), an anti-tech hawk; and Sen. Rand Paul (R-KY), who raised concerns about federal overreach. But ultimately, nearly everyone agreed on removing the AI provisions — the lone vote against it was from Sen. Thom Tillis (R-NC). The Senate must still vote on the budget reconciliation vote, after which it will return to the House before being passed to President Donald Trump&#8217;s desk.</p>
+
+<p class="has-text-align-none">The House of Representatives quietly lodged the first draft of the moratorium in its version of Trump&#8217;s funding megabill, passing it almost entirely along party lines by a vote of 215-214 in May. The stated goal was to avoid a patchwork of state AI regulations that could inhibit industry growth. But the plan was contentious even before the Senate began formal debate on its version, which required states to avoid regulating AI and &#8220;automated decision systems&#8221; if they wished to receive funding for broadband programs. It became a flash point in an already heated fight over the bill, resulting in furious backroom negotiations, an apparent deal, and then a daylong concerted effort to tank the bill. </p>
+
+<p class="has-text-align-none">Senate Republicans had already fractured over several amendments inside the bill, but the addition of the AI moratorium turned the whip count into a trainwreck of competing interests —  particularly within the Republican faction normally opposed to Big Tech and federal overreach. In a letter sent to Senate Majority Leader John Thune (R-SD) last week, several GOP senators, including Hawley and Paul, joined Blackburn in <a href="https://punchbowl.news/article/tech/gop-ai-resistance/">voicing their opposition to the bill</a> for varying reasons, including their concern that it would automatically curtail preexisting state AI laws. (Tennessee, for instance, passed a law in 2024 that protected individuals’ likenesses from being used by generative AI.)</p>
+
+<p class="has-text-align-none">On the other hand, Cruz, the chairman of the Senate Commerce, Science, and Transportation Committee and widely considered as a hard-right figure, authored an amendment that would have specifically barred states with AI laws from accessing federal funds earmarked for AI development.</p>
+
+<p class="has-text-align-none">The moratorium has proven especially unpopular with state-level GOP figures: last week, 37 state attorneys general and 17 governors bombarded Thune with letters urging him to drop the clause. Gov. Sarah Huckabee Sanders of Arkansas, Trump’s former White House press secretary, went so far as to author a <em>Washington Post </em>op-ed denouncing the bill as removing states’ abilities to protect their own citizens. Other critics contended that the bill’s definition of &#8220;AI&#8221; is <a href="https://www.theverge.com/politics/681727/ro-khanna-ai-state-law-moratorium-reconciliation">broad enough to ban</a> entire swathes of software- and internet-related regulations, including <a href="https://www.techdirt.com/2025/05/13/the-house-gop-quietly-slipped-in-an-ai-law-that-would-accidentally-ban-gops-favorite-save-the-children-laws/">Republican-backed state-level</a> online child safety laws.</p>
+						]]>
+									</content>
+
+    </entry>
+    <entry>
+
+        <author>
+            <name>Andrew Webster</name>
+        </author>
+
+        <title type="html"><![CDATA[The Running Man mixes mayhem and humor in first trailer]]></title>
+        <link rel="alternate" type="text/html"
+            href="https://www.theverge.com/news/695608/the-running-man-trailer-edgar-wright" />
+        <id>https://www.theverge.com/?p=695608</id>
+        <updated>2025-07-01T09:08:30-04:00</updated>
+        <published>2025-07-01T09:08:08-04:00</published>
+        <category scheme="https://www.theverge.com" term="Entertainment" />
+        <category scheme="https://www.theverge.com" term="Film" />
+        <category scheme="https://www.theverge.com" term="News" />
+        <category scheme="https://www.theverge.com" term="Trailers" />
+        <summary type="html"><![CDATA[As promised, the first trailer for director Edgar Wright’s take on Stephen King’s novel The Running Man is here — and it looks like a playful throwback to ‘80s action movies. The story centers on a struggling man named Ben Richards, played by Glen Powell, who is a contestant on a mega-popular TV game show [&#8230;]]]></summary>
+
+        <content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="" data-caption="" data-portal-copyright="" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/2025/07/Screenshot-2025-07-01-at-9.03.13%E2%80%AFAM.png?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+		</figcaption>
+</figure>
+<p class="has-text-align-none"><a href="https://www.theverge.com/film/695008/cant-keep-runnin-away" data-type="link" data-id="https://www.theverge.com/film/695008/cant-keep-runnin-away">As promised</a>, the first trailer for director Edgar Wright’s take on Stephen King’s novel <em>The Running Man</em> is here — and it looks like a playful throwback to ‘80s action movies.</p>
+
+<p class="has-text-align-none">The story centers on a struggling man named Ben Richards, played by  Glen Powell, who is a contestant on a mega-popular TV game show where he’s hunted by trained killers, and earns more money the longer he stays alive. The goal is to last a whole 30 days unscathed, which typically doesn’t happen. Oh, and basically every citizen is trying to catch him as well. Despite the dark premise, the trailer has a fairly lighthearted tone, mixed in with all of the death and destruction.</p>
+
+<p class="has-text-align-none">In addition to being helmed by Wright — who is best-known for movies like <em>Shaun of the Dead</em>, <em>Baby Driver</em>, and <em>Scott Pilgrim vs. The World</em> — the new movie also includes a pretty large and notable cast. That includes Powell in the lead role, alongside Katy O&#8217;Brian, Daniel Ezra, Karl Glusman, Josh Brolin, Lee Pace, Jayme Lawson, Michael Cera, Emilia Jones, William H. Macy, David Zayas, Sean Hayes, and Colman Domingo.</p>
+
+<p class="has-text-align-none">Of course, this isn’t the first adaptation of the book. It follows Paul Michael Glaser’s film from 1987, which starred Arnold Schwarzenegger and had something of a post-apocalyptic-meets-<em>American Gladiators</em> vibe.</p>
+
+<p class="has-text-align-none">The latest version of <em>The Running Man</em> also isn’t the only dystopic King adaptation in the works right now. <a href="https://www.theverge.com/film/662679/walk-hard" data-type="link" data-id="https://www.theverge.com/film/662679/walk-hard">The slightly slower-paced novel <em>The Long Walk</em></a> is also coming to theaters this year from <em>Hunger Games </em>director Francis Lawrence. It premieres on September 12th.</p>
+
+<p class="has-text-align-none"><em>The Running Man</em> is scheduled to hit theaters on November 7th.</p>
+						]]>
+									</content>
+
+    </entry>
+    <entry>
+
+        <author>
+            <name>David Pierce</name>
+        </author>
+
+        <title type="html"><![CDATA[The movie and TV tech we actually want to use]]></title>
+        <link rel="alternate" type="text/html"
+            href="https://www.theverge.com/the-vergecast/693593/best-tech-movies-tv-shows-vergecast" />
+        <id>https://www.theverge.com/?p=693593</id>
+        <updated>2025-07-01T09:06:29-04:00</updated>
+        <published>2025-07-01T09:06:29-04:00</published>
+        <category scheme="https://www.theverge.com" term="Entertainment" />
+        <category scheme="https://www.theverge.com" term="Gadgets" />
+        <category scheme="https://www.theverge.com" term="Podcasts" />
+        <category scheme="https://www.theverge.com" term="Vergecast" />
+        <summary type="html"><![CDATA[One way to think about the tech industry is just as a series of people trying to build stuff they saw in movies. Ready Player One helped kick of a flood of interest in the metaverse, despite the movie's deeply dsytopian undertones. If you've talked to anyone working in AI, they've surely told you about [&#8230;]]]></summary>
+
+        <content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="" data-caption="" data-portal-copyright="" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/2025/06/VRG_VST_0701_Site.jpg?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+		</figcaption>
+</figure>
+<p class="has-text-align-none">One way to think about the tech industry is just as a series of people trying to build stuff they saw in movies. <em>Ready Player One</em> helped kick of a flood of interest in the metaverse, despite the movie's deeply dsytopian undertones. If you've talked to anyone working in AI, they've surely told you about the assistant in <em>Her</em>, despite <em>that </em>movie's dystopian undertones. From the gesture interface in <em>Minority Report </em>to the hand-phone from <em>Total Recall </em>to just about everything from <em>Back to the Future</em> and <em>Star Trek</em>, you really can't underestimate how important and inspirational these movies and shows are to the tech imagination.</p>
+<p class="has-text-align-none">On <a href="https://link.chtbl.com/vergecast">this episode of <em>The Vergecast</em></a>, a bunch of us try to figure out which tech we actually want to use. David is joined by <em>The Verge</em>'s Allison Johnson, Jennifer Pattison-Tuohy, Mia Sato, and Victoria Song - aka the hosts of Hot Girl Vergecast Summer, coming to a feed near you for the next couple of months - to draft their way through the movie, show, and game tech they'd want to make real.</p>
+<iframe frameborder="0" height="200" src="https://playlist.megaphone.fm/?e=VMP9194544783" width="100%"></iframe>
+<p class="has-text-align-left"><strong><a href="https://forms.gle/Q1wFhpzCdM3B5bqj9">Take the poll and tell us who won the draft!</a></strong></p>
+<p class="has-text-align-none"><strong><em><strong><em>Subscribe: <a href="https://bit.ly/40Nhvbe">Spotify</a> | <a href="https://podcasts.apple.com/us/podcast/the-vergecast/id430333725">Apple </a><a href="https://bit.ly/3R97G3Z">Podcasts</a> | <a href="https://bit.ly/3WSgkWW">Overcast</a> | <a href="https://bit.ly/4hMo2db">Pocket Casts</a> | <a href="https://bit.ly/3hkwRl2">More</a></em></strong></em></strong></p>
+<p class="has-text-align-none">There are only a few rules in the draft. Rule No. 1: You c …</p>
+<p><a href="https://www.theverge.com/the-vergecast/693593/best-tech-movies-tv-shows-vergecast">Read the full story at The Verge.</a></p>
+						]]>
+									</content>
+
+    </entry>
+    <entry>
+
+        <author>
+            <name>Cameron Faulkner</name>
+        </author>
+
+        <title type="html"><![CDATA[Donkey Kong Bananza unearths the franchise’s roots and rips them out]]></title>
+        <link rel="alternate" type="text/html"
+            href="https://www.theverge.com/games/694183/donkey-kong-bananza-preview-switch-2" />
+        <id>https://www.theverge.com/?p=694183</id>
+        <updated>2025-06-30T15:40:18-04:00</updated>
+        <published>2025-07-01T09:00:00-04:00</published>
+        <category scheme="https://www.theverge.com" term="Entertainment" />
+        <category scheme="https://www.theverge.com" term="Gaming" />
+        <category scheme="https://www.theverge.com" term="Nintendo" />
+        <summary type="html"><![CDATA[Several moments of my two-hour hands-on preview of Donkey Kong Bananza felt like I was playing the gritty 2009 action game Red Faction: Guerilla - except this time I was actually playing as a gorilla. For example, I had to level a multistory building during a timed minigame. Just like in Guerilla, I targeted the [&#8230;]]]></summary>
+
+        <content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="An image of Donkey Kong and Pauline trying out some new kicks." data-caption="" data-portal-copyright="Image: Nintendo" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/2025/06/Switch2_DKB_Media-Broll_SCRN_15.png?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+		</figcaption>
+</figure>
+<p class="has-text-align-none">Several moments of my two-hour hands-on preview of <em>Donkey Kong Bananza</em> felt like I was playing the gritty 2009 action game <em>Red Faction: Guerilla</em> - except this time I was actually playing as a gorilla. For example, I had to level a multistory building during a timed minigame. Just like in <em>Guerilla</em>, I targeted the load-bearing columns with Donkey Kong's ripped arms to quickly bring it down. Reveling in the destruction made me feel equal parts satisfied and sinister, all while Donkey Kong struck a goofy pose.</p>
+<p class="has-text-align-none">Other times, I could sense a direct throughline from <em>Super Mario Odyssey</em> and other major Nintendo franchises. The way that Donkey Kong can roll into a jump (and roll at the top of a jump) feels like maneuvering with <em>Odyssey</em>'s Cappy, while exploring the heights and depths of sublevels and experimenting with physics is reminiscent of <em><a href="https://www.theverge.com/23718926/zelda-tears-of-the-kingdom-review-nintendo-switch">The Legend of Zelda: Tears of the Kingdom</a></em>. But through it all, the new <a href="https://www.theverge.com/nintendo/686603/nintendo-switch-2-review">Switch 2</a> game coming out on July 17th feels, above all else, like it's breaking new ground as its own thing.</p>
+<p class="has-text-align-none"><em>Bananza </em>is an open-world platforming RPG, complete with a skill tree that you can chip away at as you collect banandium gems. Finding five of them grants you one skill poi …</p>
+<p><a href="https://www.theverge.com/games/694183/donkey-kong-bananza-preview-switch-2">Read the full story at The Verge.</a></p>
+						]]>
+									</content>
+
+    </entry>
+    <entry>
+
+        <author>
+            <name>Jess Weatherbed</name>
+        </author>
+
+        <title type="html"><![CDATA[Google kills its Keep app on Apple Watch]]></title>
+        <link rel="alternate" type="text/html"
+            href="https://www.theverge.com/news/695590/google-keep-apple-watch-watchos-removed" />
+        <id>https://www.theverge.com/?p=695590</id>
+        <updated>2025-07-01T08:49:17-04:00</updated>
+        <published>2025-07-01T08:49:17-04:00</published>
+        <category scheme="https://www.theverge.com" term="Apple" />
+        <category scheme="https://www.theverge.com" term="Apps" />
+        <category scheme="https://www.theverge.com" term="Gadgets" />
+        <category scheme="https://www.theverge.com" term="Google" />
+        <category scheme="https://www.theverge.com" term="News" />
+        <category scheme="https://www.theverge.com" term="Smartwatch" />
+        <category scheme="https://www.theverge.com" term="Tech" />
+        <category scheme="https://www.theverge.com" term="Wearable" />
+        <summary type="html"><![CDATA[The Google graveyard has claimed another victim: the company has killed the Apple Watch version of its Keep app. While the note-taking app is still available for iPhone and iPad, the 2.2025.26200 Google Keep App Store update released on Monday has removed watchOS support, bringing the total number of Google apps for Apple Watch back [&#8230;]]]></summary>
+
+        <content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="" data-caption="Google hasn’t shown Keep much love since bringing it to Apple Watch in 2019." data-portal-copyright="" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/2025/07/Google-Keep-Apple-Watch.jpg?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+	Google hasn’t shown Keep much love since bringing it to Apple Watch in 2019.	</figcaption>
+</figure>
+<p class="has-text-align-none">The Google graveyard has claimed another victim: the company has killed the Apple Watch version of its Keep app. While the note-taking app is still available for iPhone and iPad, the <a href="https://apps.apple.com/us/app/google-keep-notes-and-lists/id1029207872">2.2025.26200 Google Keep App Store update</a> released on Monday has removed watchOS support, bringing the total number of Google apps for Apple Watch back down to three.</p>
+
+<p class="has-text-align-none">This sours some hope that Google would expand its watchOS app offerings after quietly rolling out a <a href="https://www.theverge.com/news/695165/google-calendar-apple-watch-app-watchos">new native Google Calendar app</a> for Apple Watch yesterday, having initially <a href="https://www.theverge.com/2017/5/1/15509148/apple-watch-apps-discontinued-google-maps-ebay-amazon">pulled several Google apps from the platform in 2017</a>. The Google Keep app was introduced to watchOS in 2019 but has largely been neglected since, lacking any meaningful updates. Now, Google Calendar, Maps, and YouTube Music are all that remain, with the latter two also in need of modernization.</p>
+
+<p class="has-text-align-none">While outdated, Keep was still functional on Apple Watch, providing a convenient way for users to quickly create lists or jot down information on the go. There doesn’t appear to be a notable third-party alternative on watchOS to replace it. Its removal confirms several <a href="https://www.reddit.com/r/AppleWatch/comments/1kxz5mr/the_google_keep_watch_app_is_being_discontinued/">reports made by Keep users</a> on <a href="https://www.reddit.com/r/AppleWatch/comments/1ks8s5i/welp_google_just_announced_theyre_pulling_keep/">Reddit last month</a>, who said Google had notified them that “the watch app would be deprecated soon.” We have reached out to Google to clarify why the app was removed.</p>
+
+<p class="has-text-align-none">Keep is still available for smartwatches running on Google’s own Wear OS platform. That’s unlikely to be of any comfort to Apple Watch users who are disrupted by the removal, however; they will need to wait until Apple brings a native version of <a href="https://www.theverge.com/news/679225/apple-watchos-26-wwdc-features">the Notes app to watchOS 26</a> this fall.</p>
+						]]>
+									</content>
+
+    </entry>
+    <entry>
+
+        <author>
+            <name>Elizabeth Lopatto</name>
+        </author>
+
+        <title type="html"><![CDATA[Can the music industry make AI the next Napster?]]></title>
+        <link rel="alternate" type="text/html"
+            href="https://www.theverge.com/ai-artificial-intelligence/695290/suno-udio-ai-music-legal-copyright-riaa" />
+        <id>https://www.theverge.com/?p=695290</id>
+        <updated>2025-06-30T15:06:06-04:00</updated>
+        <published>2025-07-01T08:30:00-04:00</published>
+        <category scheme="https://www.theverge.com" term="AI" />
+        <category scheme="https://www.theverge.com" term="Business" />
+        <category scheme="https://www.theverge.com" term="Copyright" />
+        <category scheme="https://www.theverge.com" term="Entertainment" />
+        <category scheme="https://www.theverge.com" term="Law" />
+        <category scheme="https://www.theverge.com" term="Music" />
+        <category scheme="https://www.theverge.com" term="Policy" />
+        <category scheme="https://www.theverge.com" term="Report" />
+        <summary type="html"><![CDATA[Sure, everyone hates record labels - but the AI industry has figured out how to make them look like heroes. So that's at least one very impressive accomplishment for AI. AI is cutting a swath across a number of creative industries - with AI-generated book covers, the Chicago Sun-Times publishing an AI-generated list of books [&#8230;]]]></summary>
+
+        <content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="" data-caption="Nice generative AI platform you have there. Would be a real shame if the RIAA… happened to it. | Image: Cath Virginia / The Verge, Getty Images" data-portal-copyright="Image: Cath Virginia / The Verge, Getty Images" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/2025/06/257760_Music_copyright_might_actually_tame_AI_CVirginia2.jpg?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+	Nice generative AI platform you have there. Would be a real shame if the RIAA… happened to it. | Image: Cath Virginia / The Verge, Getty Images	</figcaption>
+</figure>
+<p class="has-drop-cap has-text-align-none">Sure, everyone hates record labels - but the AI industry has figured out how to make them look like heroes. So that's at least one very impressive accomplishment for AI.</p>
+<p class="has-text-align-none">AI is cutting a swath across a number of creative industries - with <a href="https://www.theverge.com/2023/5/15/23724102/sarah-j-maas-ai-generated-book-cover-bloomsbury-house-of-earth-and-blood">AI-generated book covers</a>, the <em>Chicago Sun-Times</em> <a href="https://www.theverge.com/ai-artificial-intelligence/670510/chicago-sun-times-ai-generated-reading-list">publishing an AI-generated list of books that don't exist,</a> and <a href="https://www.theverge.com/2023/1/19/23562966/cnet-ai-written-stories-red-ventures-seo-marketing">AI-generated stories at <em>CNET</em> under real authors' bylines.</a> The music industry is no exception. But while many of these fields are mired in questions about whether AI models are illegally trained on pirated data, the music industry is coming at the issue from a position of unusual strength: the benefits of years of case law backing copyright protections, a regimented licensing system, and a handful of powerful companies that control the industry. Record labels have chosen to fight several AI companies on copyright law, and they have a strong hand to play.</p>
+<p class="has-text-align-none">Historically, whatever the tech industry inflicts on the music industry will eventually happen to every other creative industry, too. If that's true here, then all the AI companies that ganked copyrighted material are in a lot of trouble.</p>
+<h2 class="wp-block-heading has-text-align-none"><strong>Can home prompting kill music careers</strong>?</h2>
+<p class="has-text-align-none">There ar …</p>
+<p><a href="https://www.theverge.com/ai-artificial-intelligence/695290/suno-udio-ai-music-legal-copyright-riaa">Read the full story at The Verge.</a></p>
+						]]>
+									</content>
+
+    </entry>
+    <entry>
+
+        <author>
+            <name>Darryl Campbell</name>
+        </author>
+
+        <title type="html"><![CDATA[Newark’s air traffic outages were just the tip of the iceberg]]></title>
+        <link rel="alternate" type="text/html"
+            href="https://www.theverge.com/planes/693562/newark-air-traffic-outages-faa-obsolete-tech" />
+        <id>https://www.theverge.com/?p=693562</id>
+        <updated>2025-06-27T14:13:00-04:00</updated>
+        <published>2025-07-01T08:00:00-04:00</published>
+        <category scheme="https://www.theverge.com" term="Aviation" />
+        <category scheme="https://www.theverge.com" term="Policy" />
+        <category scheme="https://www.theverge.com" term="Tech" />
+        <category scheme="https://www.theverge.com" term="Transportation" />
+        <summary type="html"><![CDATA[On June 2nd, US Transportation Secretary Sean Duffy traveled to Newark Liberty International Airport to celebrate the reopening of runway 4L-22R. This was unusual: few runway openings are glamorous enough to warrant a visit from the airport's CEO, let alone a cabinet secretary. But as we reported last month, few airports have come to symbolize [&#8230;]]]></summary>
+
+        <content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="illustration of Sean Duffy and Newark Airport" data-caption="" data-portal-copyright="﻿Image: Cath Virginia / The Verge, Getty Images" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/2025/06/257804_Newark_FAA_fol_CVirginia.jpg?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+		</figcaption>
+</figure>
+<p class="has-text-align-none">On June 2nd, US Transportation Secretary Sean Duffy traveled to Newark Liberty International Airport to celebrate the reopening of runway 4L-22R. This was unusual: few runway openings are glamorous enough to warrant a visit from the <a href="https://www.dfwairport.com/dfwnewsroom/dfw-airport-completes-major-runway-rehabilitation-project-ahead-of-schedule/">airport's CEO</a>, let alone a cabinet secretary. But <a href="https://www.theverge.com/planes/673462/newark-airport-delay-air-traffic-control-tracon-radar">as we reported last month</a>, few airports have come to symbolize USDOT's mismanagement of the air traffic control system as much as Newark. </p>
+<p class="has-text-align-none">The <a href="https://www.youtube.com/watch?v=4FS84dD80jg">ceremony and press conference</a> was meant to transform Newark into a different symbol - one of progress and action. In his speech, Duffy positioned Newark's problems as solvable, and the people onstage - who included the Federal Aviation Administration (FAA)'s Acting Administrator Chris Rocheleau, United Airlines CEO Scott Kirby, and several other dignitaries - as the problem-solvers.</p>
+<p class="has-text-align-none">Together, they'd gotten union labor to rebuild a runway in 47 days instead of 60; they'd convinced Verizon to expedite a new fiber-optic cable; they'd identified and fixed the "glitch in the system" that left Newark's air traffic controllers blind and unable to speak to pilots for several terrifying minutes. </p>
+<p class="has-text-align-none">Because of this whirlwind of activity, Rocheleau expected that Newark wou …</p>
+<p><a href="https://www.theverge.com/planes/693562/newark-air-traffic-outages-faa-obsolete-tech">Read the full story at The Verge.</a></p>
+						]]>
+									</content>
+
+    </entry>
+    <entry>
+
+        <author>
+            <name>Emma Roth</name>
+        </author>
+
+        <title type="html"><![CDATA[Cloudflare will now block AI crawlers by default]]></title>
+        <link rel="alternate" type="text/html"
+            href="https://www.theverge.com/news/695501/cloudflare-block-ai-crawlers-default" />
+        <id>https://www.theverge.com/?p=695501</id>
+        <updated>2025-06-30T18:56:25-04:00</updated>
+        <published>2025-07-01T06:00:00-04:00</published>
+        <category scheme="https://www.theverge.com" term="AI" />
+        <category scheme="https://www.theverge.com" term="News" />
+        <category scheme="https://www.theverge.com" term="Tech" />
+        <category scheme="https://www.theverge.com" term="Web" />
+        <summary type="html"><![CDATA[The major internet architecture provider Cloudflare will now block known AI web crawlers by default to prevent them from “accessing content without permission or compensation,” according to an announcement on Tuesday. With the change, Cloudflare will start asking new domain owners whether they want to allow AI scrapers, and will even let some publishers implement [&#8230;]]]></summary>
+
+        <content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="" data-caption="" data-portal-copyright="" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/2025/06/STKB326_CLOUDFLARE_B.jpg?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+		</figcaption>
+</figure>
+<p class="has-text-align-none">The major internet architecture provider Cloudflare will now block known AI web crawlers by default to prevent them from “accessing content without permission or compensation,” according to an announcement on Tuesday. With the change, Cloudflare will start asking new domain owners whether they want to allow AI scrapers, and will even let some publishers implement a “Pay Per Crawl” fee.</p>
+
+<p class="has-text-align-none">The Pay Per Crawl program will let publishers set a price for AI scrapers to access their content. AI companies can then view pricing and choose whether to register for the “Pay Per Crawl” fee or turn away. This is only available for “a group of some of the leading publishers and content creators” for now, but Cloudflare says it will ensure “AI companies can use quality content the right way — with permission and compensation.”</p>
+
+<p class="has-text-align-none">Cloudflare has been helping domain owners fight AI crawlers for a while now. The company started letting websites <a href="https://blog.cloudflare.com/ai-bots/">block AI crawlers</a> in 2023, but it only applied to ones that abide by <a href="https://www.theverge.com/24067997/robots-txt-ai-text-file-web-crawlers-spiders">a site’s robots.txt file</a>, the unenforceable agreement that signals whether bots can scrape its content. Cloudflare began <a href="https://blog.cloudflare.com/declaring-your-aindependence-block-ai-bots-scrapers-and-crawlers-with-a-single-click/">allowing websites to block</a> “all” AI bots last year — whether they respect a site’s robots.txt file or not — and now this setting is enabled by default for new Cloudflare customers. (The company identifies scrapers to block by comparing them to its list of known AI bots.) Cloudflare also rolled out a feature in March <a href="https://www.theverge.com/news/634345/cloudflare-ai-labyrinth-web-scraping-bots-training-data">that sends web-crawling bots</a> into an “AI Labyrinth” to deter them from scraping sites without permission. </p>
+
+<p class="has-text-align-none">Several major publishers and online platforms, including <em>The Associated Press</em>, <em>The Atlantic</em>, <em>Fortune</em>, Stack Overflow, and Quora, are on board with Cloudflare’s new AI crawler restrictions, as websites contend with a future where more people are finding information through AI chatbots, rather than search engines. “People trust the AI more over the last six months, which means they&#8217;re not reading original content,” Cloudflare CEO Matthew Prince <a href="https://www.axios.com/2025/06/19/ai-search-traffic-publishers">said during the Axios Live event last week</a>. </p>
+
+<p class="has-text-align-none">Additionally, Cloudflare says it’s working with AI companies to help verify their crawlers and allow them to “clearly state their purpose,” such as whether they’re using the content for training, inference, or search. Website owners can then review this information and determine which crawlers to let in.</p>
+
+<p class="has-text-align-none">“Original content is what makes the Internet one of the greatest inventions in the last century, and we have to come together to protect it,” Prince said in the press release. “AI crawlers have been scraping content without limits. Our goal is to put the power back in the hands of creators, while still helping AI companies innovate.”</p>
+						]]>
+									</content>
+
+    </entry>
+    <entry>
+
+        <author>
+            <name>Jess Weatherbed</name>
+        </author>
+
+        <title type="html"><![CDATA[Tinder’s mandatory facial recognition check comes to the US]]></title>
+        <link rel="alternate" type="text/html"
+            href="https://www.theverge.com/news/695582/tinder-facial-recognition-us-california-test" />
+        <id>https://www.theverge.com/?p=695582</id>
+        <updated>2025-07-01T05:10:31-04:00</updated>
+        <published>2025-07-01T05:10:31-04:00</published>
+        <category scheme="https://www.theverge.com" term="News" />
+        <category scheme="https://www.theverge.com" term="Security" />
+        <category scheme="https://www.theverge.com" term="Tech" />
+        <category scheme="https://www.theverge.com" term="Tinder" />
+        <summary type="html"><![CDATA[Tinder is trialing mandatory facial recognition security features in the US to verify profiles and crack down on impersonation and fake accounts. New users in California are now required to provide a biometric “Face Check” scan to confirm their face matches their profile photos for the dating service, Axios reported on Monday. The Face Check [&#8230;]]]></summary>
+
+        <content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="" data-caption="" data-portal-copyright="" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/2025/07/Tinder-Face-Check-verification-feature.jpg?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+		</figcaption>
+</figure>
+<p class="has-text-align-none">Tinder is trialing mandatory facial recognition security features in the US to verify profiles and crack down on impersonation and fake accounts. New users in California are now required to provide a biometric “Face Check” scan to confirm their face matches their profile photos for the dating service, <a href="https://www.axios.com/2025/06/30/tinder-face-check-safety"><em>Axios </em>reported on Monday</a>.</p>
+
+<p class="has-text-align-none">The Face Check feature involves taking a short video selfie that’s used to match biometric indicators and prove that the Tinder user isn’t a bot using artificially generated images, providing them with a verified badge upon completion. The scan will also check if the user&#8217;s face is being used in multiple accounts, which could help to prevent users from being impersonated or having their likeness used by deceptive “catfish” profiles.&nbsp;</p>
+
+<p class="has-text-align-none">Face Check is separate from <a href="https://www.theverge.com/2024/2/20/24078089/tinder-blue-verification-checkmark-id-upload">Tinder’s ID Check feature</a>, which uses government-issued ID to verify users&#8217; age and identity, while Face Check seemingly only requires users to upload a selfie video. Tinder users have provided video selfies to <a href="https://www.theverge.com/2023/4/26/23698503/tinder-video-selfie-verification-security">verify their profiles since 2023</a>, but verification wasn’t a mandatory requirement for creating a Tinder account. This change means that Californians will have to complete some version of verification if they want to use the platform at all. </p>
+
+<p class="has-text-align-none">“We see this as one part of a set of identity assurance options that are available to users,&#8221; Match Group&#8217;s head of trust and safety, Yoel Roth, told <em>Axios</em>. &#8220;Face Check &#8230; is really meant to be about confirming that this person is a real, live person and not a bot or a spoofed account.&#8221;</p>
+
+<p class="has-text-align-none">Tinder says the selfie video is deleted once verification is complete, but that the platform stores a “non-reversible, encrypted face map” to detect duplicate user accounts in the future.&nbsp;</p>
+
+<p class="has-text-align-none">The Face Check feature has already been piloted in Colombia and Canada, with Roth telling <em>Axios</em> that those tests showed “promising” results in “improving perceptions of authenticity” and reducing reports of bad actors. Tinder will now monitor how users in California respond to the Face Check feature before deciding if it should be rolled out more broadly across the US, according to Roth.</p>
+						]]>
+									</content>
+
+    </entry>
+    <entry>
+
+        <author>
+            <name>Jay Peters</name>
+        </author>
+
+        <title type="html"><![CDATA[Steam can now show you how much frame generation changes your games]]></title>
+        <link rel="alternate" type="text/html"
+            href="https://www.theverge.com/news/695543/valve-steam-performance-monitor-frame-generation-frame-rates" />
+        <id>https://www.theverge.com/?p=695543</id>
+        <updated>2025-07-01T00:14:56-04:00</updated>
+        <published>2025-06-30T19:35:06-04:00</published>
+        <category scheme="https://www.theverge.com" term="Entertainment" />
+        <category scheme="https://www.theverge.com" term="Gaming" />
+        <category scheme="https://www.theverge.com" term="News" />
+        <category scheme="https://www.theverge.com" term="PC Gaming" />
+        <summary type="html"><![CDATA[Valve has added a new performance monitor to Steam that can help you understand why a game may or may not be running smoothly. Not only does it break out a game’s overall frame rate, it can tell you how many of those frames were generated by techniques&#160; like Nvidia’s DLSS or AMD’s FSR, according [&#8230;]]]></summary>
+
+        <content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="" data-caption="" data-portal-copyright="" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/2025/02/STK138_Stream_Kradtke_02.jpg?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+		</figcaption>
+</figure>
+<p class="has-text-align-none">Valve has added a new performance monitor to Steam that can help you understand why a game may or may not be running smoothly. Not only does it break out a game’s overall frame rate, it can tell you how many of those frames were generated by techniques&nbsp; like Nvidia’s DLSS or AMD’s FSR, <a href="https://steamcommunity.com/games/593110/announcements/detail/500576552635859540?utm_source=SteamDB">according to a post</a>.</p>
+
+<p class="has-text-align-none">The change is included as part of an update to the Steam Client that’s available now, though Valve notes that this “first version” focuses on “Windows users and on the most common GPU hardware.”</p>
+
+<p class="has-text-align-none">The company says the new performance monitor currently offers up to four different levels of detail: a single FPS value, FPS details, CPU and GPU utilization, and “FPS, CPU, GPU &amp; RAM Full Details.” The more you choose to show, the more of your screen will be taken up by the performance monitor.</p>
+<img src="https://platform.theverge.com/wp-content/uploads/sites/2/2025/06/b206e23c3ded152c341a789867c29d610523f299.png?quality=90&#038;strip=all&#038;crop=41.271505376344,0,17.456989247312,100" alt="" title="" data-has-syndication-rights="1" data-caption="&lt;em&gt;The new performance monitor.&lt;/em&gt;" data-portal-copyright="" />
+<p class="has-text-align-none">Steam previously offered a simple FPS counter, but separating out generated frames from the frames fully rendered by your graphics cores can help you better understand key differences between what you see and how a game feels. “Frame generation can&#8217;t help with things like input latency that matter to competitive gamers, but it can make things look visually smoother on today’s high refresh rate monitors,” Valve says <a href="https://help.steampowered.com/en/faqs/view/3462-CD4C-36BD-5767">in a detailed support document</a> about the performance monitor.&nbsp;</p>
+
+<p class="has-text-align-none">In practice, what that should mean is that you can see whether your game feels like it’s running at just 30 fps because it actually is running at 30 fps inside the game engine, even though you’re seeing a visually smoother image due to Nvidia and AMD’s added “fake frames.” (It’s a whole debate in the PC gaming community, and it appears Valve isn’t taking sides here.)&nbsp;</p>
+
+<p class="has-text-align-none">Valve has already given handheld gamers a taste of these quick insights by building tools <a href="https://github.com/flightlessmango/MangoHud">like MangoHud </a>into the Steam Deck and SteamOS, which similarly let you monitor your CPU, graphics, RAM, and carefully ration out your battery life. But having a way to do so built into desktop Steam will make the insights much more accessible to many more gamers.</p>
+
+<p class="has-text-align-none">Valve says that it has plans to “add some additional pieces of data to the performance overlay going forward, to detect certain common bad hardware performance scenarios, and to show a larger summary of your game&#8217;s performance in the overlay itself when you hit shift-tab.”</p>
+						]]>
+									</content>
+
+    </entry>
+</feed>

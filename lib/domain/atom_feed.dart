@@ -166,16 +166,16 @@ class AtomFeed {
               ?.trim() ??
           feedElement.findElements('updated').firstOrNull?.text.trim() ??
           feedElement.findElements('updated').firstOrNull?.innerText.trim()),
-      items: feedElement
-          .findElements('entry')
-          .map((e) => AtomItem.parse(e))
-          .toList(),
-      links: withArticles
+      items: withArticles
           ? feedElement
-              .findElements('link')
-              .map((e) => AtomLink.parse(e))
+              .findElements('entry')
+              .map((e) => AtomItem.parse(e))
               .toList()
           : null,
+      links: feedElement
+          .findElements('link')
+          .map((e) => AtomLink.parse(e))
+          .toList(),
       authors: feedElement
           .findElements('author')
           .map((e) => AtomPerson.parse(e))

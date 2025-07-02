@@ -80,20 +80,29 @@ FeedType detectFeedTypeEfficiently(String xml) {
         cleanedXml.substring(firstTagStart + 1, firstTagEnd).trim();
 
     // Handle self-closing tags and extract just the tag name
-    final tagName = tagContent.split(' ').first.split('/').first.trim();
+    final tagName =
+        tagContent.split(' ').first.split('/').first.trim().toLowerCase();
 
-    // Check for RSS 2.0
+    // Check for RSS 2.0 (case insensitive)
     if (tagName == 'rss') {
+      // Validate that it's properly formed RSS
+      if (!_isValidRssStructure(cleanedXml)) {
+        return FeedType.unknown;
+      }
       return FeedType.rss;
     }
 
-    // Check for Atom
+    // Check for Atom (case insensitive)
     if (tagName == 'feed') {
+      // Validate that it's properly formed Atom
+      if (!_isValidAtomStructure(cleanedXml)) {
+        return FeedType.unknown;
+      }
       return FeedType.atom;
     }
 
-    // Check for RSS 1.0 (RDF) - handle both 'RDF' and 'rdf:RDF'
-    if (tagName == 'RDF' || tagName == 'rdf:RDF') {
+    // Check for RSS 1.0 (RDF) - handle both 'RDF' and 'rdf:RDF' (case insensitive)
+    if (tagName == 'rdf' || tagName == 'rdf:rdf') {
       return FeedType.rdf;
     }
 
@@ -101,6 +110,32 @@ FeedType detectFeedTypeEfficiently(String xml) {
   } catch (e) {
     return FeedType.unknown;
   }
+}
+
+/// Validates that XML has proper RSS structure
+bool _isValidRssStructure(String xml) {
+  // Check for proper opening and closing tags
+  final rssOpenCount =
+      RegExp(r'<rss[^>]*>', caseSensitive: false).allMatches(xml).length;
+  final rssCloseCount =
+      RegExp(r'</rss>', caseSensitive: false).allMatches(xml).length;
+  final channelOpenCount =
+      RegExp(r'<channel[^>]*>', caseSensitive: false).allMatches(xml).length;
+  final channelCloseCount =
+      RegExp(r'</channel>', caseSensitive: false).allMatches(xml).length;
+
+  return rssOpenCount == rssCloseCount && channelOpenCount == channelCloseCount;
+}
+
+/// Validates that XML has proper Atom structure
+bool _isValidAtomStructure(String xml) {
+  // Check for proper opening and closing tags
+  final feedOpenCount =
+      RegExp(r'<feed[^>]*>', caseSensitive: false).allMatches(xml).length;
+  final feedCloseCount =
+      RegExp(r'</feed>', caseSensitive: false).allMatches(xml).length;
+
+  return feedOpenCount == feedCloseCount;
 }
 
 /// Detects the type of feed from XML content
@@ -138,25 +173,26 @@ FeedType detectFeedType(String xml) {
     final document = XmlDocument.parse(xml);
     final rootElement = document.rootElement;
 
-    // Check for RSS 2.0
-    if (rootElement.name.local == 'rss') {
+    // Check for RSS 2.0 (case insensitive)
+    if (rootElement.name.local.toLowerCase() == 'rss') {
       return FeedType.rss;
     }
 
-    // Check for Atom
-    if (rootElement.name.local == 'feed') {
+    // Check for Atom (case insensitive)
+    if (rootElement.name.local.toLowerCase() == 'feed') {
       return FeedType.atom;
     }
 
-    // Check for RSS 1.0 (RDF)
-    if (rootElement.name.local == 'RDF' ||
-        (rootElement.name.local == 'rdf:RDF') ||
-        (rootElement.name.qualified == 'rdf:RDF')) {
+    // Check for RSS 1.0 (RDF) - case insensitive
+    final localName = rootElement.name.local.toLowerCase();
+    final qualifiedName = rootElement.name.qualified.toLowerCase();
+    if (localName == 'rdf' || qualifiedName == 'rdf:rdf') {
       return FeedType.rdf;
     }
 
     return FeedType.unknown;
   } catch (e) {
-    return FeedType.unknown;
+    // If XML parsing fails, try the efficient method as fallback
+    return detectFeedTypeEfficiently(xml);
   }
 }

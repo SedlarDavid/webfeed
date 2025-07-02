@@ -131,13 +131,22 @@ String? getAttributeWithNamespace(XmlElement element, String attributeName) {
 
 /// Strips CDATA wrapper if present, otherwise returns the string as is
 /// Returns a tuple: (isCdata, value)
+/// For nested CDATA, preserves the inner CDATA structure
 ({bool isCdata, String value}) stripCdataWithFlag(String text) {
-  final cdataPattern = RegExp(r'^\s*<!\[CDATA\[(.*)\]\]>\s*$', dotAll: true);
-  final match = cdataPattern.firstMatch(text);
+  var currentText = text.trim();
+  var isCdata = false;
+
+  // Check if the entire text is wrapped in CDATA
+  final outerCdataPattern =
+      RegExp(r'^\s*<!\[CDATA\[(.*)\]\]>\s*$', dotAll: true);
+  final match = outerCdataPattern.firstMatch(currentText);
   if (match != null) {
-    return (isCdata: true, value: match.group(1)?.trim() ?? '');
+    isCdata = true;
+    // Return the inner content as-is, preserving any nested CDATA
+    currentText = match.group(1)?.trim() ?? '';
   }
-  return (isCdata: false, value: text.trim());
+
+  return (isCdata: isCdata, value: currentText);
 }
 
 /// Decodes HTML entities using comprehensive html_unescape package
@@ -196,6 +205,7 @@ String? extractTextContent(XmlElement? element) {
 
 /// Manual CDATA extraction as a fallback method
 /// This is used when the standard XML parsing methods don't work as expected
+/// Handles deeply nested CDATA by recursively extracting all CDATA content
 String? _extractCdataContent(XmlElement element) {
   try {
     // Get the raw XML string for this element
@@ -207,7 +217,17 @@ String? _extractCdataContent(XmlElement element) {
 
     if (matches.isNotEmpty) {
       // If there are multiple CDATA sections, join them
-      return matches.map((match) => match.group(1) ?? '').join('');
+      final cdataContent =
+          matches.map((match) => match.group(1) ?? '').join('');
+
+      // Recursively check if the extracted content contains more CDATA
+      final nestedCdataPattern = RegExp(r'<!\[CDATA\[(.*?)\]\]>', dotAll: true);
+      if (nestedCdataPattern.hasMatch(cdataContent)) {
+        // Extract nested CDATA content recursively
+        return _extractNestedCdata(cdataContent);
+      }
+
+      return cdataContent;
     }
 
     // If no CDATA found, try to extract content between opening and closing tags
@@ -228,9 +248,66 @@ String? _extractCdataContent(XmlElement element) {
   }
 }
 
+/// Extracts nested CDATA content while preserving the structure
+/// For nested CDATA like <![CDATA[<![CDATA[content]]>]]>,
+/// returns <![CDATA[content]]> (preserves inner CDATA)
+String _extractNestedCdata(String content) {
+  // Only strip the outermost CDATA wrapper, preserve inner ones
+  final outerCdataPattern = RegExp(r'^<!\[CDATA\[(.*)\]\]>$', dotAll: true);
+  final match = outerCdataPattern.firstMatch(content);
+  if (match != null) {
+    return match.group(1)?.trim() ?? '';
+  }
+  return content;
+}
+
 /// Enhanced text extraction with namespace support
 /// This function combines namespace-aware element finding with comprehensive text extraction
 String? getTextContentWithNamespace(XmlNode? node, String tagName) {
   final element = findElementWithNamespace(node, tagName);
   return extractTextContent(element);
+}
+
+/// Validates XML for common unclosed tag issues
+/// Throws ArgumentError if unclosed tags are detected
+void validateXmlForUnclosedTags(String xmlString) {
+  // Check for common unclosed tag patterns
+  final lines = xmlString.split('\n');
+  for (var i = 0; i < lines.length; i++) {
+    final line = lines[i].trim();
+    if (line.isEmpty) continue;
+
+    // Check for opening tags without closing tags on the same line
+    final openingTags =
+        RegExp(r'<([a-zA-Z][a-zA-Z0-9_:]*)[^>]*>').allMatches(line);
+    final closingTags = RegExp(r'</([a-zA-Z][a-zA-Z0-9_:]*)>').allMatches(line);
+
+    // If we have more opening tags than closing tags, check if they're self-closing
+    if (openingTags.length > closingTags.length) {
+      for (final match in openingTags) {
+        final tagName = match.group(1)!;
+        final fullTag = match.group(0)!;
+
+        // Skip self-closing tags
+        if (fullTag.endsWith('/>')) continue;
+
+        // Check if this tag is closed later in the same line
+        final tagClosingPattern = RegExp('</$tagName>');
+        if (!tagClosingPattern.hasMatch(line)) {
+          // Check if it's closed in subsequent lines
+          var foundClosing = false;
+          for (var j = i + 1; j < lines.length; j++) {
+            if (tagClosingPattern.hasMatch(lines[j])) {
+              foundClosing = true;
+              break;
+            }
+          }
+          if (!foundClosing) {
+            throw ArgumentError(
+                'Unclosed tag <$tagName> detected at line ${i + 1}');
+          }
+        }
+      }
+    }
+  }
 }

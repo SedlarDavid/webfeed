@@ -11,8 +11,12 @@ import 'package:webfeed/util/xml.dart'
         stripCdata,
         getTextContentWithNamespace,
         stripCdataWithFlag,
-        decodeHtmlEntities;
+        decodeHtmlEntities,
+        validateXmlForUnclosedTags,
+        findDirectElementWithNamespace,
+        extractTextContent;
 import 'package:xml/xml.dart';
+import 'package:webfeed/domain/atom_source.dart';
 
 class AtomFeed {
   final String? id;
@@ -152,47 +156,69 @@ class AtomFeed {
   FeedImage? get image => feedImage;
 
   factory AtomFeed.parse(String xmlString, {bool withArticles = true}) {
-    var document = XmlDocument.parse(xmlString);
-    var feedElement = document.findElements('feed').firstOrNull;
-    if (feedElement == null) {
-      throw ArgumentError('feed not found');
-    }
+    try {
+      // Validate for unclosed tags before parsing
+      validateXmlForUnclosedTags(xmlString);
 
-    final entryElements = feedElement.findElements('entry').toList();
-    final parsedItems = entryElements.map((e) => AtomItem.parse(e)).toList();
-    return AtomFeed(
-      id: _normalizeField(getTextContentWithNamespace(feedElement, 'id')),
-      title: _normalizeField(getTextContentWithNamespace(feedElement, 'title')),
-      updated:
-          parseDateTime(getTextContentWithNamespace(feedElement, 'updated')),
-      items: withArticles ? parsedItems : null,
-      links: feedElement
-          .findElements('link')
-          .map((e) => AtomLink.parse(e))
-          .toList(),
-      authors: feedElement
-          .findElements('author')
-          .map((e) => AtomPerson.parse(e))
-          .toList(),
-      contributors: feedElement
-          .findElements('contributor')
-          .map((e) => AtomPerson.parse(e))
-          .toList(),
-      categories: feedElement
-          .findElements('category')
-          .map((e) => AtomCategory.parse(e))
-          .toList(),
-      generator: feedElement
-          .findElements('generator')
-          .map((e) => AtomGenerator.parse(e))
-          .firstOrNull,
-      icon: _normalizeField(getTextContentWithNamespace(feedElement, 'icon')),
-      logo: _normalizeField(getTextContentWithNamespace(feedElement, 'logo')),
-      rights:
-          _normalizeField(getTextContentWithNamespace(feedElement, 'rights')),
-      subtitle:
-          _normalizeField(getTextContentWithNamespace(feedElement, 'subtitle')),
-    );
+      // Handle multiple XML declarations by keeping only the first one
+      var cleanedXml = xmlString;
+      final xmlDeclarations = RegExp(r'<\?xml[^>]*\?>').allMatches(xmlString);
+      if (xmlDeclarations.length > 1) {
+        // Remove all XML declarations and add back only the first one
+        cleanedXml = xmlString.replaceAll(RegExp(r'<\?xml[^>]*\?>'), '');
+        final firstDeclaration = xmlDeclarations.first.group(0)!;
+        cleanedXml = firstDeclaration + cleanedXml;
+      }
+
+      var document = XmlDocument.parse(cleanedXml);
+      var feedElement = document.findElements('feed').firstOrNull;
+      if (feedElement == null) {
+        throw ArgumentError('feed not found');
+      }
+      final entryElements = feedElement.findElements('entry').toList();
+      final parsedItems = entryElements.map((e) => AtomItem.parse(e)).toList();
+      // Return null for empty lists instead of empty list
+      final finalItems = parsedItems.isEmpty ? null : parsedItems;
+      return AtomFeed(
+        id: _normalizeField(_getDirectTextContent(feedElement, 'id')),
+        title: _normalizeField(_getDirectTextContent(feedElement, 'title')),
+        updated: parseDateTime(_getDirectTextContent(feedElement, 'updated')),
+        items: withArticles ? finalItems : null,
+        links: feedElement
+            .findElements('link')
+            .map((e) => AtomLink.parse(e))
+            .toList(),
+        authors: feedElement
+            .findElements('author')
+            .map((e) => AtomPerson.parse(e))
+            .toList(),
+        contributors: feedElement
+            .findElements('contributor')
+            .map((e) => AtomPerson.parse(e))
+            .toList(),
+        categories: feedElement
+            .findElements('category')
+            .map((e) => AtomCategory.parse(e))
+            .toList(),
+        generator: feedElement
+            .findElements('generator')
+            .map((e) => AtomGenerator.parse(e))
+            .firstOrNull,
+        icon: _normalizeField(_getDirectTextContent(feedElement, 'icon')),
+        logo: _normalizeField(_getDirectTextContent(feedElement, 'logo')),
+        rights: _normalizeField(_getDirectTextContent(feedElement, 'rights')),
+        subtitle:
+            _normalizeField(_getDirectTextContent(feedElement, 'subtitle')),
+      );
+    } catch (e) {
+      if (e.toString().contains('XmlParserException') ||
+          e.toString().contains('XmlTagException') ||
+          e.toString().contains('Expected') ||
+          e.toString().contains('but found')) {
+        throw ArgumentError('Malformed XML: [31m${e.toString()}[0m');
+      }
+      throw ArgumentError('Failed to parse Atom feed: ${e.toString()}');
+    }
   }
 
   // Helper method to normalize field values (decode HTML entities and handle empty strings)
@@ -204,65 +230,109 @@ class AtomFeed {
     return trimmed;
   }
 
+  // Helper method to get text content from direct child elements only (not descendants)
+  static String? _getDirectTextContent(XmlElement element, String tagName) {
+    final directElement = findDirectElementWithNamespace(element, tagName);
+    return extractTextContent(directElement);
+  }
+
+  static String? _decodeOrCdata(String? text) {
+    if (text == null) return null;
+    var result = text;
+    // Recursively strip all CDATA markers
+    while (result.contains('<![CDATA[') && result.contains(']]>')) {
+      result = result
+          .replaceAll(RegExp(r'<!\[CDATA\['), '')
+          .replaceAll(RegExp(r']]>', dotAll: true), '');
+    }
+    final decoded = decodeHtmlEntities(result);
+    final trimmed = decoded.trim();
+    // For CDATA sections, return empty string if empty, not null
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
   /// Efficient parsing method for large XML files
   /// Uses regex-based parsing instead of full DOM parsing for better performance
   static AtomFeed parseEfficiently(String xmlString,
       {bool withArticles = true}) {
     try {
-      // Extract basic metadata using regex for speed with CDATA support
-      // Look for feed-level elements specifically within feed element to avoid matching entry elements
-      final feedMatch = RegExp(r'<feed[^>]*>(.*?)</feed>', dotAll: true)
-          .firstMatch(xmlString);
-      final feedContent = feedMatch?.group(1) ?? '';
+      // Validate for unclosed tags before parsing
+      validateXmlForUnclosedTags(xmlString);
 
-      final titleMatch = RegExp(r'<title[^>]*>(.*?)</title>', dotAll: true)
-          .firstMatch(feedContent);
-      final idMatch =
-          RegExp(r'<id[^>]*>(.*?)</id>', dotAll: true).firstMatch(feedContent);
-      final updatedMatch =
-          RegExp(r'<updated[^>]*>(.*?)</updated>', dotAll: true)
-              .firstMatch(feedContent);
-      final iconMatch = RegExp(r'<icon[^>]*>(.*?)</icon>', dotAll: true)
-          .firstMatch(feedContent);
-      final logoMatch = RegExp(r'<logo[^>]*>(.*?)</logo>', dotAll: true)
-          .firstMatch(feedContent);
-      final rightsMatch = RegExp(r'<rights[^>]*>(.*?)</rights>', dotAll: true)
-          .firstMatch(feedContent);
-      final subtitleMatch =
-          RegExp(r'<subtitle[^>]*>(.*?)</subtitle>', dotAll: true)
-              .firstMatch(feedContent);
-
-      // Parse complex elements efficiently
-      final links = _parseLinksEfficiently(xmlString);
-      final authors = _parseAuthorsEfficiently(xmlString);
-      final contributors = _parseContributorsEfficiently(xmlString);
-      final categories = _parseCategoriesEfficiently(xmlString);
-      final generator = _parseGeneratorEfficiently(xmlString);
-
-      // Parse items efficiently if requested
-      List<AtomItem>? items;
-      if (withArticles) {
-        items = _parseItemsEfficiently(xmlString);
+      // Handle multiple XML declarations by keeping only the first one
+      var cleanedXml = xmlString;
+      final xmlDeclarations = RegExp(r'<\?xml[^>]*\?>').allMatches(xmlString);
+      if (xmlDeclarations.length > 1) {
+        // Remove all XML declarations and add back only the first one
+        cleanedXml = xmlString.replaceAll(RegExp(r'<\?xml[^>]*\?>'), '');
+        final firstDeclaration = xmlDeclarations.first.group(0)!;
+        cleanedXml = firstDeclaration + cleanedXml;
       }
 
+      final feedMatch = RegExp(r'<feed[^>]*>(.*?)</feed>', dotAll: true)
+          .firstMatch(cleanedXml);
+      final feedContent = feedMatch?.group(1) ?? '';
+      // Only match feed-level fields before the first <entry> (if any)
+      String? feedTitle;
+      final entryTagMatch =
+          RegExp(r'<entry[\s>]', dotAll: true).firstMatch(feedContent);
+      final beforeEntry = entryTagMatch == null
+          ? feedContent
+          : feedContent.substring(0, entryTagMatch.start);
+      final titleMatch = RegExp(r'<title[^>]*>(.*?)</title>', dotAll: true)
+          .firstMatch(beforeEntry);
+      feedTitle =
+          titleMatch != null ? _decodeOrCdata(titleMatch.group(1)) : null;
+      final idMatch =
+          RegExp(r'<id[^>]*>(.*?)</id>', dotAll: true).firstMatch(beforeEntry);
+      final updatedMatch =
+          RegExp(r'<updated[^>]*>(.*?)</updated>', dotAll: true)
+              .firstMatch(beforeEntry);
+      final iconMatch = RegExp(r'<icon[^>]*>(.*?)</icon>', dotAll: true)
+          .firstMatch(beforeEntry);
+      final logoMatch = RegExp(r'<logo[^>]*>(.*?)</logo>', dotAll: true)
+          .firstMatch(beforeEntry);
+      final rightsMatch = RegExp(r'<rights[^>]*>(.*?)</rights>', dotAll: true)
+          .firstMatch(beforeEntry);
+      final subtitleMatch =
+          RegExp(r'<subtitle[^>]*>(.*?)</subtitle>', dotAll: true)
+              .firstMatch(beforeEntry);
+      // Only parse links, authors, contributors, categories from beforeEntry
+      final links = _parseLinksEfficiently(beforeEntry);
+      final authors = _parseAuthorsEfficiently(beforeEntry);
+      final contributors = _parseContributorsEfficiently(beforeEntry);
+      final categories = _parseCategoriesEfficiently(beforeEntry);
+      final generator = _parseGeneratorEfficiently(beforeEntry);
+      List<AtomItem>? items;
+      if (withArticles) {
+        items = _parseItemsEfficiently(cleanedXml);
+      }
+      // Return empty list instead of null for consistency
+      final finalItems = items ?? <AtomItem>[];
       return AtomFeed(
         id: _decodeOrCdata(idMatch?.group(1)),
-        title: _decodeOrCdata(titleMatch?.group(1)),
+        title: feedTitle,
         updated: parseDateTime(_decodeOrCdata(updatedMatch?.group(1))),
-        items: items,
+        items: finalItems.isEmpty ? null : finalItems,
         icon: _decodeOrCdata(iconMatch?.group(1)),
         logo: _decodeOrCdata(logoMatch?.group(1)),
         rights: _decodeOrCdata(rightsMatch?.group(1)),
         subtitle: _decodeOrCdata(subtitleMatch?.group(1)),
-        links: links,
-        authors: authors,
-        contributors: contributors,
-        categories: categories,
+        links: links.isEmpty ? <AtomLink>[] : links,
+        authors: authors.isEmpty ? <AtomPerson>[] : authors,
+        contributors: contributors.isEmpty ? <AtomPerson>[] : contributors,
+        categories: categories.isEmpty ? <AtomCategory>[] : categories,
         generator: generator,
       );
     } catch (e) {
+      if (e.toString().contains('XmlParserException') ||
+          e.toString().contains('XmlTagException') ||
+          e.toString().contains('Expected') ||
+          e.toString().contains('but found')) {
+        throw ArgumentError('Malformed XML: ${e.toString()}');
+      }
       throw ArgumentError(
-          'Failed to parse Atom feed efficiently: \\${e.toString()}');
+          'Failed to parse Atom feed efficiently: ${e.toString()}');
     }
   }
 
@@ -299,6 +369,23 @@ class AtomFeed {
       final contentMatch =
           RegExp(r'<content[^>]*>(.*?)</content>', dotAll: true)
               .firstMatch(entryXml);
+      final publishedMatch =
+          RegExp(r'<published[^>]*>(.*?)</published>', dotAll: true)
+              .firstMatch(entryXml);
+      final rightsMatch = RegExp(r'<rights[^>]*>(.*?)</rights>', dotAll: true)
+          .firstMatch(entryXml);
+
+      // Parse links, authors, contributors, and categories
+      final links = _parseLinksEfficiently(entryXml);
+      final authors = _parseAuthorsEfficiently(entryXml);
+      final contributors = _parseContributorsEfficiently(entryXml);
+      final categories = _parseCategoriesEfficiently(entryXml);
+      // Parse source if present
+      final sourceMatch = RegExp(r'<source[^>]*>(.*?)</source>', dotAll: true)
+          .firstMatch(entryXml);
+      final source = sourceMatch != null
+          ? _parseSourceEfficiently(sourceMatch.group(0)!)
+          : null;
 
       return AtomItem(
         title: _decodeOrCdata(titleMatch?.group(1)),
@@ -306,36 +393,24 @@ class AtomFeed {
         updated: parseDateTime(_decodeOrCdata(updatedMatch?.group(1))),
         summary: _decodeOrCdata(summaryMatch?.group(1)),
         content: _decodeOrCdata(contentMatch?.group(1)),
-        links: null,
-        authors: null,
-        contributors: null,
-        categories: null,
-        published: null,
-        rights: null,
-        source: null,
+        links: links,
+        authors: authors,
+        contributors: contributors,
+        categories: categories,
+        published: _decodeOrCdata(publishedMatch?.group(1)),
+        rights: _decodeOrCdata(rightsMatch?.group(1)),
+        source: source,
       );
     } catch (e) {
       return null;
     }
   }
 
-  static String? _decodeOrCdata(String? text) {
-    if (text == null) return null;
-    final result = stripCdataWithFlag(text);
-    final decoded = decodeHtmlEntities(result.value);
-    final trimmed = decoded.trim();
-    // For CDATA sections, return empty string if empty, not null
-    if (result.isCdata) {
-      return trimmed;
-    }
-    // For regular text, return null if empty
-    return trimmed.isEmpty ? null : trimmed;
-  }
-
   /// Parse links efficiently using regex
   static List<AtomLink> _parseLinksEfficiently(String xmlString) {
     final links = <AtomLink>[];
-    final linkPattern = RegExp(r'<link[^>]*>(.*?)</link>', dotAll: true);
+    // Match both self-closing <link ... /> and opening/closing <link>...</link> tags
+    final linkPattern = RegExp(r'<link[^>]*?(?:/>|>.*?</link>)', dotAll: true);
 
     for (final match in linkPattern.allMatches(xmlString)) {
       final linkXml = match.group(0)!;
@@ -355,14 +430,19 @@ class AtomFeed {
       final relMatch = RegExp(r'rel="([^"]*)"').firstMatch(linkXml);
       final typeMatch = RegExp(r'type="([^"]*)"').firstMatch(linkXml);
       final titleMatch = RegExp(r'title="([^"]*)"').firstMatch(linkXml);
-
+      final hreflangMatch = RegExp(r'hreflang="([^"]*)"').firstMatch(linkXml);
+      final lengthMatch = RegExp(r'length="([^"]*)"').firstMatch(linkXml);
+      var length = 0;
+      if (lengthMatch != null) {
+        length = int.tryParse(lengthMatch.group(1) ?? '0') ?? 0;
+      }
       return AtomLink(
         hrefMatch?.group(1),
         relMatch?.group(1),
         typeMatch?.group(1),
-        null, // hreflang
+        hreflangMatch?.group(1),
         titleMatch?.group(1),
-        0, // length
+        length,
       );
     } catch (e) {
       return null;
@@ -425,8 +505,9 @@ class AtomFeed {
   /// Parse categories efficiently using regex
   static List<AtomCategory> _parseCategoriesEfficiently(String xmlString) {
     final categories = <AtomCategory>[];
+    // Match both self-closing <category ... /> and opening/closing <category>...</category> tags
     final categoryPattern =
-        RegExp(r'<category[^>]*>(.*?)</category>', dotAll: true);
+        RegExp(r'<category[^>]*?(?:/>|>.*?</category>)', dotAll: true);
 
     for (final match in categoryPattern.allMatches(xmlString)) {
       final categoryXml = match.group(0)!;
@@ -473,6 +554,26 @@ class AtomFeed {
         uriMatch?.group(1),
         versionMatch?.group(1),
         _decodeOrCdata(generatorMatch.group(1)),
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // _parseSourceEfficiently should return a valid AtomSource or null
+  static AtomSource? _parseSourceEfficiently(String sourceXml) {
+    try {
+      final idMatch =
+          RegExp(r'<id[^>]*>(.*?)</id>', dotAll: true).firstMatch(sourceXml);
+      final titleMatch = RegExp(r'<title[^>]*>(.*?)</title>', dotAll: true)
+          .firstMatch(sourceXml);
+      final updatedMatch =
+          RegExp(r'<updated[^>]*>(.*?)</updated>', dotAll: true)
+              .firstMatch(sourceXml);
+      return AtomSource(
+        id: _decodeOrCdata(idMatch?.group(1)),
+        title: _decodeOrCdata(titleMatch?.group(1)),
+        updated: _decodeOrCdata(updatedMatch?.group(1)),
       );
     } catch (e) {
       return null;

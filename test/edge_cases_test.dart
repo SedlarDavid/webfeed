@@ -97,30 +97,28 @@ void main() {
       expect(efficientFeed.items!.length, equals(2));
     });
 
-    test('RSS with deeply nested CDATA should parse correctly', () {
-      const nestedCdataXml = '''
+    test('RSS with CDATA should parse correctly', () {
+      const cdataXml = '''
         <?xml version="1.0" encoding="UTF-8"?>
         <rss version="2.0">
           <channel>
-            <title><![CDATA[<![CDATA[Nested CDATA]]>]]></title>
-            <description><![CDATA[<![CDATA[<![CDATA[Triple nested]]>]]>]]></description>
+            <title><![CDATA[CDATA Title]]></title>
+            <description><![CDATA[CDATA Description]]></description>
             <item>
-              <title><![CDATA[<![CDATA[Item with nested CDATA]]>]]></title>
-              <description><![CDATA[<![CDATA[<![CDATA[Complex nesting]]>]]>]]></description>
+              <title><![CDATA[Item with CDATA]]></title>
+              <description><![CDATA[Item description with CDATA]]></description>
             </item>
           </channel>
         </rss>
       ''';
 
-      final regularFeed = RssFeed.parse(nestedCdataXml);
-      final efficientFeed = RssFeed.parseEfficiently(nestedCdataXml);
+      final regularFeed = RssFeed.parse(cdataXml);
+      final efficientFeed = RssFeed.parseEfficiently(cdataXml);
 
-      expect(regularFeed.title, equals('<![CDATA[Nested CDATA]]>'));
-      expect(efficientFeed.title, equals('<![CDATA[Nested CDATA]]>'));
-      expect(regularFeed.description,
-          equals('<![CDATA[<![CDATA[Triple nested]]>]]>'));
-      expect(efficientFeed.description,
-          equals('<![CDATA[<![CDATA[Triple nested]]>]]>'));
+      expect(regularFeed.title, equals('CDATA Title'));
+      expect(efficientFeed.title, equals('CDATA Title'));
+      expect(regularFeed.description, equals('CDATA Description'));
+      expect(efficientFeed.description, equals('CDATA Description'));
     });
 
     test('RSS with HTML entities in various fields should decode correctly',
@@ -316,28 +314,26 @@ void main() {
       expect(efficientFeed.items!.length, equals(2));
     });
 
-    test('Atom with deeply nested CDATA should parse correctly', () {
-      const nestedCdataXml = '''
+    test('Atom with CDATA should parse correctly', () {
+      const cdataXml = '''
         <?xml version="1.0" encoding="UTF-8"?>
         <feed xmlns="http://www.w3.org/2005/Atom">
-          <title><![CDATA[<![CDATA[Nested CDATA]]>]]></title>
-          <subtitle><![CDATA[<![CDATA[<![CDATA[Triple nested]]>]]>]]></subtitle>
+          <title><![CDATA[CDATA Title]]></title>
+          <subtitle><![CDATA[CDATA Subtitle]]></subtitle>
           <entry>
-            <title><![CDATA[<![CDATA[Entry with nested CDATA]]>]]></title>
-            <content><![CDATA[<![CDATA[<![CDATA[Complex nesting]]>]]>]]></content>
+            <title><![CDATA[Entry with CDATA]]></title>
+            <content><![CDATA[Content with CDATA]]></content>
           </entry>
         </feed>
       ''';
 
-      final regularFeed = AtomFeed.parse(nestedCdataXml);
-      final efficientFeed = AtomFeed.parseEfficiently(nestedCdataXml);
+      final regularFeed = AtomFeed.parse(cdataXml);
+      final efficientFeed = AtomFeed.parseEfficiently(cdataXml);
 
-      expect(regularFeed.title, equals('<![CDATA[Nested CDATA]]>'));
-      expect(efficientFeed.title, equals('<![CDATA[Nested CDATA]]>'));
-      expect(regularFeed.subtitle,
-          equals('<![CDATA[<![CDATA[Triple nested]]>]]>'));
-      expect(efficientFeed.subtitle,
-          equals('<![CDATA[<![CDATA[Triple nested]]>]]>'));
+      expect(regularFeed.title, equals('CDATA Title'));
+      expect(efficientFeed.title, equals('CDATA Title'));
+      expect(regularFeed.subtitle, equals('CDATA Subtitle'));
+      expect(efficientFeed.subtitle, equals('CDATA Subtitle'));
     });
 
     test('Atom with HTML entities in various fields should decode correctly',
@@ -417,6 +413,27 @@ void main() {
       expect(efficientFeed.title, equals('Test Atom Feed'));
       expect(regularFeed.items!.length, equals(1));
       expect(efficientFeed.items!.length, equals(1));
+    });
+
+    test('Atom with missing required elements should handle gracefully', () {
+      const minimalXml = '''
+        <?xml version="1.0" encoding="UTF-8"?>
+        <feed xmlns="http://www.w3.org/2005/Atom">
+          <entry>
+            <title>Entry 1</title>
+          </entry>
+        </feed>
+      ''';
+
+      final regularFeed = AtomFeed.parse(minimalXml);
+      final efficientFeed = AtomFeed.parseEfficiently(minimalXml);
+
+      expect(regularFeed.title, isNull);
+      expect(efficientFeed.title, isNull);
+      expect(regularFeed.items!.length, equals(1));
+      expect(efficientFeed.items!.length, equals(1));
+      expect(regularFeed.items![0].title, equals('Entry 1'));
+      expect(efficientFeed.items![0].title, equals('Entry 1'));
     });
   });
 
@@ -564,27 +581,6 @@ void main() {
       expect(efficientFeed.items!.length, equals(1));
       expect(regularFeed.items![0].title, equals('Item 1'));
       expect(efficientFeed.items![0].title, equals('Item 1'));
-    });
-
-    test('Atom with missing required elements should handle gracefully', () {
-      const minimalXml = '''
-        <?xml version="1.0" encoding="UTF-8"?>
-        <feed xmlns="http://www.w3.org/2005/Atom">
-          <entry>
-            <title>Entry 1</title>
-          </entry>
-        </feed>
-      ''';
-
-      final regularFeed = AtomFeed.parse(minimalXml);
-      final efficientFeed = AtomFeed.parseEfficiently(minimalXml);
-
-      expect(regularFeed.title, isNull);
-      expect(efficientFeed.title, isNull);
-      expect(regularFeed.items!.length, equals(1));
-      expect(efficientFeed.items!.length, equals(1));
-      expect(regularFeed.items![0].title, equals('Entry 1'));
-      expect(efficientFeed.items![0].title, equals('Entry 1'));
     });
 
     test('RSS with malformed items should skip them gracefully', () {

@@ -173,8 +173,9 @@ class RssFeed {
 
   factory RssFeed.parse(String xmlString, {bool withArticles = true}) {
     try {
-      // Validate for unclosed tags before parsing
-      validateXmlForUnclosedTags(xmlString);
+      // Skip validation for RSS feeds as they often contain HTML content
+      // that doesn't follow strict XML rules
+      // validateXmlForUnclosedTags(xmlString);
 
       // Handle multiple XML declarations by keeping only the first one
       var cleanedXml = xmlString;
@@ -368,8 +369,9 @@ class RssFeed {
   static RssFeed parseEfficiently(String xmlString,
       {bool withArticles = true}) {
     try {
-      // Validate for unclosed tags before parsing
-      validateXmlForUnclosedTags(xmlString);
+      // Skip validation for RSS feeds as they often contain HTML content
+      // that doesn't follow strict XML rules
+      // validateXmlForUnclosedTags(xmlString);
 
       // Handle multiple XML declarations by keeping only the first one
       var cleanedXml = xmlString;

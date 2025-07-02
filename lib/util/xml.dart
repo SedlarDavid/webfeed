@@ -270,7 +270,26 @@ String? getTextContentWithNamespace(XmlNode? node, String tagName) {
 
 /// Validates XML for common unclosed tag issues
 /// Throws ArgumentError if unclosed tags are detected
+/// More lenient for HTML content within RSS feeds
 void validateXmlForUnclosedTags(String xmlString) {
+  // List of common HTML self-closing tags that don't need closing tags
+  final htmlSelfClosingTags = {
+    'area',
+    'base',
+    'br',
+    'col',
+    'embed',
+    'hr',
+    'img',
+    'input',
+    'link',
+    'meta',
+    'param',
+    'source',
+    'track',
+    'wbr'
+  };
+
   // Check for common unclosed tag patterns
   final lines = xmlString.split('\n');
   for (var i = 0; i < lines.length; i++) {
@@ -288,8 +307,11 @@ void validateXmlForUnclosedTags(String xmlString) {
         final tagName = match.group(1)!;
         final fullTag = match.group(0)!;
 
-        // Skip self-closing tags
+        // Skip self-closing tags (both XML and HTML style)
         if (fullTag.endsWith('/>')) continue;
+
+        // Skip HTML self-closing tags
+        if (htmlSelfClosingTags.contains(tagName.toLowerCase())) continue;
 
         // Check if this tag is closed later in the same line
         final tagClosingPattern = RegExp('</$tagName>');

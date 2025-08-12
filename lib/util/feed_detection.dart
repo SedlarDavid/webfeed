@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:xml/xml.dart';
 
 /// Feed type enumeration
@@ -215,11 +213,12 @@ bool _isValidJsonStructure(String content) {
 FeedType detectFeedType(String xml) {
   try {
     // Check for JSON Feed first (most efficient check)
-    try {
-      jsonDecode(xml);
-      return FeedType.json;
-    } catch (e) {
-      //Continue with checks
+    final trimmedContent = xml.replaceAll('\n', '').trim();
+    if (trimmedContent.startsWith('{') && trimmedContent.endsWith('}')) {
+      // Validate that it's properly formed JSON
+      if (_isValidJsonStructure(trimmedContent)) {
+        return FeedType.json;
+      }
     }
 
     final document = XmlDocument.parse(xml);

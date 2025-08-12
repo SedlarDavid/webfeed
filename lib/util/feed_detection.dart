@@ -11,6 +11,9 @@ enum FeedType {
   /// RDF Feed type (RSS 1.0)
   rdf,
 
+  /// JSON Feed type
+  json,
+
   /// Unknown feed type
   unknown
 }
@@ -25,6 +28,7 @@ enum FeedType {
 /// - [FeedType.rss] for RSS 2.0 feeds
 /// - [FeedType.atom] for Atom feeds
 /// - [FeedType.rdf] for RSS 1.0 (RDF) feeds
+/// - [FeedType.json] for JSON feeds
 /// - [FeedType.unknown] if the feed type cannot be determined
 ///
 /// Example:
@@ -45,6 +49,10 @@ enum FeedType {
 ///     final feed = RssFeed.parse(response.body); // RDF uses the same parser
 ///     // Process RDF/RSS 1.0 feed
 ///     break;
+///   case FeedType.json:
+///     final feed = JsonFeed.fromJson(response.body);
+///     // Process JSON feed
+///     break;
 ///   case FeedType.unknown:
 ///     // Handle unknown feed type
 ///     break;
@@ -52,6 +60,15 @@ enum FeedType {
 /// ```
 FeedType detectFeedTypeEfficiently(String xml) {
   try {
+    // Check for JSON Feed first (most efficient check)
+    final trimmedContent = xml.trim();
+    if (trimmedContent.startsWith('{') && trimmedContent.endsWith('}')) {
+      // Validate that it's properly formed JSON
+      if (_isValidJsonStructure(trimmedContent)) {
+        return FeedType.json;
+      }
+    }
+
     // Remove XML declaration and whitespace at the beginning
     var cleanedXml = xml.trim();
 
@@ -138,12 +155,33 @@ bool _isValidAtomStructure(String xml) {
   return feedOpenCount == feedCloseCount;
 }
 
+/// Validates that content has proper JSON structure
+bool _isValidJsonStructure(String content) {
+  try {
+    // Check for basic JSON structure
+    if (!content.startsWith('{') || !content.endsWith('}')) {
+      return false;
+    }
+
+    // Check for required JSON Feed fields
+    final hasVersion =
+        content.contains('"version"') || content.contains("'version'");
+    final hasItems = content.contains('"items"') || content.contains("'items'");
+
+    // JSON Feed must have version and items
+    return hasVersion && hasItems;
+  } catch (e) {
+    return false;
+  }
+}
+
 /// Detects the type of feed from XML content
 ///
 /// Returns a [FeedType] enum indicating the detected feed type:
 /// - [FeedType.rss] for RSS 2.0 feeds
 /// - [FeedType.atom] for Atom feeds
 /// - [FeedType.rdf] for RSS 1.0 (RDF) feeds
+/// - [FeedType.json] for JSON feeds
 /// - [FeedType.unknown] if the feed type cannot be determined
 ///
 /// Example:
@@ -163,6 +201,10 @@ bool _isValidAtomStructure(String xml) {
 ///   case FeedType.rdf:
 ///     final feed = RssFeed.parse(response.body); // RDF uses the same parser
 ///     break;
+///   case FeedType.json:
+///     final feed = JsonFeed.fromJson(response.body);
+///     // Process JSON feed
+///     break;
 ///   case FeedType.unknown:
 ///     // Handle unknown feed type
 ///     break;
@@ -170,6 +212,15 @@ bool _isValidAtomStructure(String xml) {
 /// ```
 FeedType detectFeedType(String xml) {
   try {
+    // Check for JSON Feed first (most efficient check)
+    final trimmedContent = xml.trim();
+    if (trimmedContent.startsWith('{') && trimmedContent.endsWith('}')) {
+      // Validate that it's properly formed JSON
+      if (_isValidJsonStructure(trimmedContent)) {
+        return FeedType.json;
+      }
+    }
+
     final document = XmlDocument.parse(xml);
     final rootElement = document.rootElement;
 

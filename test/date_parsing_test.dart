@@ -95,6 +95,43 @@ void main() {
       expect(missingDayOfWeek?.hour, 14);
     });
     
+    test('Applies the timezone offset instead of the device timezone', () {
+      // Regression: feeds with a +0000 offset (e.g. ABC News) were shifted by
+      // the device's local timezone because the offset was parsed but ignored.
+      // The parsed instant must be independent of where the test runs.
+      final utc = parseDateTime('Mon, 03 Nov 2025 11:42:12 +0000');
+      expect(utc?.toUtc(), DateTime.utc(2025, 11, 3, 11, 42, 12));
+
+      // +1100 is 11 hours ahead of UTC -> 11:30 UTC.
+      final ahead = parseDateTime('Mon, 03 Nov 2025 22:30:00 +1100');
+      expect(ahead?.toUtc(), DateTime.utc(2025, 11, 3, 11, 30, 0));
+
+      // -0500 is 5 hours behind UTC -> 19:00 UTC.
+      final behind = parseDateTime('Mon, 26 Mar 2018 14:00:00 -0500');
+      expect(behind?.toUtc(), DateTime.utc(2018, 3, 26, 19, 0, 0));
+
+      // Half-hour offsets must also be honoured.
+      final halfHour = parseDateTime('Mon, 03 Nov 2025 11:42:12 +0530');
+      expect(halfHour?.toUtc(), DateTime.utc(2025, 11, 3, 6, 12, 12));
+
+      // A timezone abbreviation maps to its offset.
+      final gmt = parseDateTime('Mon, 03 Nov 2025 11:42:12 GMT');
+      expect(gmt?.toUtc(), DateTime.utc(2025, 11, 3, 11, 42, 12));
+
+      // A timezone-naive RFC822 value is assumed to be UTC.
+      final naive = parseDateTime('Mon, 03 Nov 2025 11:42:12');
+      expect(naive?.toUtc(), DateTime.utc(2025, 11, 3, 11, 42, 12));
+    });
+
+    test('ISO 8601 offsets resolve to the correct UTC instant', () {
+      final iso = parseDateTime('2018-03-26T14:00:00+02:00');
+      expect(iso?.toUtc(), DateTime.utc(2018, 3, 26, 12, 0, 0));
+
+      // A timezone-naive ISO value is assumed to be UTC.
+      final naiveIso = parseDateTime('2018-03-26T14:00:00');
+      expect(naiveIso?.toUtc(), DateTime.utc(2018, 3, 26, 14, 0, 0));
+    });
+
     test('Handle invalid dates gracefully', () {
       // Empty string
       expect(parseDateTime(''), isNull);

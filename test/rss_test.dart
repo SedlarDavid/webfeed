@@ -76,7 +76,7 @@ void main() {
     expect(feed.items!.first.link, 'https://foo.bar.news/1');
     expect(feed.items!.first.guid, 'https://foo.bar.news/1?guid');
     expect(feed.items!.first.pubDate,
-        DateTime(2018, 03, 26, 14)); //Mon, 26 Mar 2018 14:00:00 PDT
+        DateTime.utc(2018, 03, 26, 21)); //Mon, 26 Mar 2018 14:00:00 PDT (-0700)
     expect(feed.items!.first.categories!.first.domain, 'news');
     expect(feed.items!.first.categories!.first.value, 'Lorem');
     expect(feed.items!.first.author, 'alice@foo.bar.news');
@@ -142,7 +142,7 @@ void main() {
     expect(item.title, 'The Judy\'s -- The Moo Song');
     expect(item.link, 'http://www.foo.com');
     expect(item.pubDate,
-        DateTime(2001, 08, 27, 16, 08, 56)); //Mon, 27 Aug 2001 16:08:56 PST
+        DateTime.utc(2001, 08, 28, 0, 08, 56)); //Mon, 27 Aug 2001 16:08:56 PST (-0800)
 
     expect(item.media!.group!.contents!.length, 5);
     expect(item.media!.group!.credits!.length, 2);
@@ -526,7 +526,8 @@ void main() {
         'Haberman reveals why Trump attacked judge and his family in speech');
     expect(secondItem.description,
         'CNN political contributor Maggie Haberman explains the reasoning behind Donald Trump\'s attacks on the judge and his family during a speech at his Mar-a-Lago resort after he was arraigned on felony charges.');
-    expect(secondItem.pubDate, DateTime(2023, 04, 05, 13, 30, 09));
+    expect(secondItem.pubDate,
+        DateTime.utc(2023, 04, 05, 13, 30, 09)); //Wed, 05 Apr 2023 13:30:09 GMT
 
     // Verify media:group exists in second item
     expect(secondItem.media!.group, isNotNull);

@@ -1,14 +1,20 @@
 import 'package:intl/intl.dart';
 
+// RFC822 patterns WITHOUT a trailing timezone token. The numeric offset is
+// stripped and applied explicitly (see [_parseRfc822DateTime]) because
+// `DateFormat` parses the `Z` field positionally but ignores its value,
+// which would otherwise interpret the wall-clock in the device's local
+// timezone and silently shift every timestamp.
 const rfc822DatePattern = 'EEE, dd MMM yyyy HH:mm:ss Z';
 
-// Additional RFC822 date patterns to try
-final List<String> _additionalRfc822Patterns = [
-  'EEE, dd MMM yyyy HH:mm:ss', // Missing timezone
-  'dd MMM yyyy HH:mm:ss Z', // Missing weekday
-  'EEE, dd MMM yyyy HH:mm Z', // Missing seconds
-  'EEE, d MMM yyyy HH:mm:ss Z', // Single-digit day
-  'EEE, dd MMM yyyy HH:mm:ss z', // Timezone abbreviation
+final List<String> _rfc822PatternsWithoutZone = [
+  'EEE, dd MMM yyyy HH:mm:ss', // Standard
+  'dd MMM yyyy HH:mm:ss', // Missing weekday
+  'EEE, dd MMM yyyy HH:mm', // Missing seconds
+  'EEE, d MMM yyyy HH:mm:ss', // Single-digit day
+  'EEE, d MMM yyyy HH:mm', // Single-digit day, missing seconds
+  'd MMM yyyy HH:mm:ss', // Single-digit day, missing weekday
+  'dd MMM yyyy HH:mm', // Missing weekday and seconds
 ];
 
 // Common timezone abbreviations mapping to UTC offsets
@@ -25,12 +31,14 @@ final Map<String, String> _timezoneAbbreviations = {
   'UTC': '+0000',
 };
 
+// Matches a trailing numeric timezone offset, e.g. `+0000`, `-0500`, `+11:00`.
+final RegExp _numericOffsetPattern = RegExp(r'([+-])(\d{2}):?(\d{2})$');
+
 DateTime? parseDateTime(dateString) {
   if (dateString == null || dateString.toString().trim().isEmpty) return null;
   var normalizedDateString = _normalizeDateTime(dateString.toString());
 
   return _parseRfc822DateTime(normalizedDateString) ??
-      _tryAdditionalRfc822Formats(normalizedDateString) ??
       _parseIso8601DateTime(normalizedDateString);
 }
 
@@ -49,26 +57,40 @@ String _normalizeDateTime(String dateString) {
   return normalized;
 }
 
-DateTime? _parseRfc822DateTime(String dateString) {
-  try {
-    final length = dateString.length.clamp(0, rfc822DatePattern.length);
-    final trimmedPattern = rfc822DatePattern.substring(0, length);
-    final format = DateFormat(trimmedPattern, 'en_US');
-    return format.parse(dateString);
-  } on FormatException {
-    return null;
-  } catch (e) {
-    return null;
+/// Splits a trailing numeric offset off [dateString].
+///
+/// Returns the [Duration] the wall-clock is ahead of UTC and the remaining
+/// date string with the offset removed. When no explicit offset is present the
+/// value is assumed to be UTC (`Duration.zero`), matching the RSS/Atom
+/// convention of treating timezone-naive timestamps as UTC.
+(Duration, String) _extractOffset(String dateString) {
+  final trimmed = dateString.trim();
+  final match = _numericOffsetPattern.firstMatch(trimmed);
+  if (match == null) {
+    return (Duration.zero, trimmed);
   }
+  final sign = match.group(1) == '-' ? -1 : 1;
+  final hours = int.parse(match.group(2)!);
+  final minutes = int.parse(match.group(3)!);
+  final offset = Duration(hours: hours, minutes: minutes) * sign;
+  final stripped = trimmed.substring(0, match.start).trim();
+  return (offset, stripped);
 }
 
-DateTime? _tryAdditionalRfc822Formats(String dateString) {
-  for (var pattern in _additionalRfc822Patterns) {
+DateTime? _parseRfc822DateTime(String dateString) {
+  final (offset, stripped) = _extractOffset(dateString);
+
+  for (final pattern in _rfc822PatternsWithoutZone) {
     try {
-      final format = DateFormat(pattern, 'en_US');
-      return format.parse(dateString);
+      // Parse the wall-clock fields as UTC, then subtract the feed's offset to
+      // get the true UTC instant. This keeps the result independent of the
+      // device's local timezone.
+      final wallClockAsUtc = DateFormat(pattern, 'en_US').parseUtc(stripped);
+      return wallClockAsUtc.subtract(offset);
+    } on FormatException {
+      // Try the next pattern.
     } catch (e) {
-      // Try next pattern
+      // Try the next pattern.
     }
   }
   return null;
@@ -76,7 +98,10 @@ DateTime? _tryAdditionalRfc822Formats(String dateString) {
 
 DateTime? _parseIso8601DateTime(dateString) {
   try {
-    return DateTime.parse(dateString);
+    // DateTime.parse honours an explicit offset / `Z` and returns a UTC
+    // instant; a timezone-naive value is assumed to be UTC for consistency.
+    final parsed = DateTime.parse(dateString);
+    return parsed.isUtc ? parsed : DateTime.parse('${dateString}Z');
   } on FormatException {
     // Try to fix common ISO-8601 issues
     String fixedString = dateString;
